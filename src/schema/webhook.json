@@ -1,0 +1,69 @@
+{
+  "body":{
+    "oneOf": [
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "info",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["follow"]
+          },
+          "info": {
+            "type": "object",
+            "required": ["contract", "caller", "calldata"],
+            "properties": {
+              "contract": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "caller": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "calldata": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "required": [
+          "type",
+          "info",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["timestamp"]
+          },
+          "info": {
+            "type": "object",
+            "required": ["timestamp", "blocksSinceTimestamp"],
+            "properties": {
+              "timestamp": {
+                "type": "number"
+              },
+              "blocksSinceTimestamp": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
