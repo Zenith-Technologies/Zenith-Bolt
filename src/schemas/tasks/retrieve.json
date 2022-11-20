@@ -1,0 +1,43 @@
+{
+  "querystring" :{
+    "id":{
+      "type": "string"
+    }
+  },
+  "response": {
+    "2xx": {
+      "body": {
+        "type": "object",
+        "required": [
+          "contract",
+          "owner",
+          "data"
+        ],
+        "properties": {
+          "contract": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "data": {
+            "type": "string"
+          }
+        }
+      },
+      "response": {
+        "2xx": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}
