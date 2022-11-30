@@ -1,5 +1,7 @@
 import { nanoid } from 'nanoid'
 import {ethers} from "ethers";
+import config from "../utils/StorageHandler";
+import {IGroup} from "./GroupsManager";
 
 export interface IWalletGroup {
     name: string,
@@ -57,6 +59,8 @@ class WalletsManager {
 
         this.wallets[groupId] = newGroup;
 
+        config.set(`walletgroups.${groupId}`, newGroup);
+
         return true;
     }
 
@@ -64,11 +68,21 @@ class WalletsManager {
         return true;
     }
 
+    addWalletToGroup(wallet: IWalletOptions, group: IWalletGroup){
+        const convertedWallet = this.convertWallets([wallet])[0];
+
+        group.wallets.push(convertedWallet);
+
+        this.wallets[group.id] = group;
+
+        config.set(`walletgroups.${group.id}`, group);
+    }
+
     editWalletGroup(group: IWalletGroupEditOptions): boolean {
         // First we need to delete all PKs stored from old group
         const oldGroup: IWalletGroup = this.wallets[group.id];
         for(let wallet of oldGroup.wallets){
-            // del(wallet.id)
+            config.delete(`wallets.${wallet.id}`);
         }
 
         // Create a new group and override the old one
@@ -82,14 +96,24 @@ class WalletsManager {
 
         this.wallets[group.id] = newGroup;
 
+        config.set(`walletgroups.${group.id}`, group);
+
         return true;
     }
 
     fetchWallet(id: string): IFullWallet {
+        if(!config.has(`wallets.${id}`)){
+            return {
+                id: "",
+                address: "",
+                privateKey: ""
+            };
+        }
+        const fullWallet = config.get(`wallets.${id}`) as IFullWallet;
         return {
-            id: "",
-            address: "",
-            privateKey: ""
+            id: fullWallet.id,
+            address: fullWallet.address,
+            privateKey: fullWallet.privateKey
         };
     }
 
@@ -104,7 +128,14 @@ class WalletsManager {
                 address
             }
 
+            const fullWallet: IFullWallet = {
+                ...newWallet,
+                privateKey: wallet.privateKey,
+            }
+
             newWallets.push(newWallet);
+
+            config.set(`wallets.${id}`, fullWallet);
         }
 
         return newWallets;
