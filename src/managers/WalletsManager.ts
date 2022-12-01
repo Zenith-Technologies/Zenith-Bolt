@@ -35,13 +35,23 @@ export interface IWalletOptions {
     privateKey: string
 }
 
+interface WalletGroupObject {
+    [key: string]: IWalletGroup
+}
+
 class WalletsManager {
-    private wallets: {
-        [key: string]: IWalletGroup
-    }
+    private wallets: WalletGroupObject
 
     constructor() {
         this.wallets = {};
+        if(config.has("walletgroups")){
+            const rawGroups = config.get("walletgroups") as WalletGroupObject;
+            for(let rawGroup in rawGroups){
+                const group = rawGroups[rawGroup];
+
+                this.wallets[group.id] = group;
+            }
+        }
     }
 
     createWalletGroup(group: IWalletGroupCreateOptions): boolean{
@@ -115,6 +125,10 @@ class WalletsManager {
             address: fullWallet.address,
             privateKey: fullWallet.privateKey
         };
+    }
+
+    getGroups(): IWalletGroup[] {
+        return Object.values(this.wallets);
     }
 
     private convertWallets(wallets: IWalletOptions[]): IWallet[] {

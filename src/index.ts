@@ -4,9 +4,9 @@ dotenv.config()
 
 import fastify from 'fastify';
 import {RouteRegister} from "./routes/RouteRegister";
+import walletsManager from "./managers/WalletsManager";
+import groupsManager from "./managers/GroupsManager";
 const server = fastify();
-
-const config = new Conf();
 
 console.log('Starting server...');
 (new RouteRegister(server)).registerRoutes().then(() => {
