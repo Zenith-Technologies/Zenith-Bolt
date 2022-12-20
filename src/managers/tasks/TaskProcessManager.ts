@@ -1,5 +1,5 @@
-import {ITask} from "./TasksManager";
-import config from "../utils/StorageHandler";
+import {ITask} from "../TasksManager";
+import config from "../../utils/StorageHandler";
 import {EventEmitter} from "events";
 
 export class TaskProcessManager extends EventEmitter{
