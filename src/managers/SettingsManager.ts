@@ -2,39 +2,18 @@ import {nanoid} from "nanoid";
 import config from "../utils/StorageHandler";
 
 export interface ISettings {
-    rpcs: {
-        [key: string]: IRPC
-    }
-}
-
-export interface IRPCOptions {
-    default?: boolean,
-    name: string,
-    url: string
-    type: "http" | "ws"
-}
-
-interface IRPC {
-    id: string,
-    default: boolean,
-    name: string,
-    url: string
-    type: "http" | "ws"
+    [key: string]: string
 }
 
 export interface ISettingsOptions {
-    rpcs: {
-        [key: string]: IRPCOptions
-    }
+    [key: string]: string
 }
 
 class SettingsManager {
     private settings: ISettings;
 
     constructor() {
-        this.settings = {
-            rpcs: {}
-        }
+        this.settings = {}
 
         if(config.has("settings")){
             this.settings = config.get("settings") as ISettings;
@@ -45,23 +24,19 @@ class SettingsManager {
         return JSON.parse(JSON.stringify(this.settings));
     }
 
+    // Updates all new settings (can pass just an empty object and nothing would update)
     updateSettings(newSettings: ISettingsOptions){
-        const toSet: ISettings = {
-            rpcs: {}
-        }
-        let count = Object.values(newSettings.rpcs).length;
-        for(let [key, value] of Object.entries(newSettings.rpcs)){
-            toSet.rpcs[key] = {
-                default: value.default ?? count === 1,
-                name: value.name,
-                url: value.url,
-                type: value.type,
-                id: key
-            };
+        const toSet: ISettings = {};
+
+        for(let settingName in newSettings){
+            const setting = newSettings[settingName];
+
+            if(setting !== "" && this.settings[settingName] !== setting){
+                this.settings[settingName] = setting;
+            }
         }
 
-        config.set("settings", toSet);
-        this.settings = toSet;
+        config.set("settings", this.settings);
     }
 }
 

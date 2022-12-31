@@ -1,6 +1,6 @@
-import {ITask} from "../TasksManager";
 import config from "../../utils/StorageHandler";
 import {EventEmitter} from "events";
+import {ITask} from "../../definitions/tasks/TaskTypes";
 
 export class TaskProcessManager extends EventEmitter{
     private task: ITask;

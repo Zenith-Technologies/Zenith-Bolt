@@ -10,19 +10,37 @@ interface IMonitorCallbacks {
     [key: string]: MonitorCallback
 }
 
+interface BlockObject {
+    transactions: string[],
+    number: number,
+    timestamp: number
+}
+
 interface MonitorBlockCallback {
-    (id: string, block: number, time: number): void;
+    (id: string, block: BlockObject): void;
 }
 
 interface MonitorWatchCallback {
-    (id: string, stage: "confirmed" | "pending", block: number, time: number): void;
+    (id: string, stage: "confirmed" | "pending", block: number, gas: GasObject): void;
 }
 
-interface SocketMessage {
+type SocketMessage = WatchMessage | BlockMessage;
+
+interface GasObject {
+    maxPriorityFeePerGas: number,
+    maxFeePerGas: number
+}
+
+interface WatchMessage {
     id: string,
-    stage?: "confirmed" | "pending",
+    stage: "confirmed" | "pending",
     block: number,
-    time: number
+    gas: GasObject
+}
+
+interface BlockMessage {
+    id: string,
+    block: BlockObject
 }
 
 class MonitorManager extends EventEmitter{
@@ -107,18 +125,42 @@ class MonitorManager extends EventEmitter{
         return false;
     }
 
+    async removeMonitorTask(type: "watch" | "block", id: string): Promise<void>{
+        if(type === "block"){
+            try {
+                const response = await axios({
+                    url: `${MONITOR_URL}task/block/${id}`,
+                    method: "DELETE",
+                    data: {}
+                })
+            }catch(err){
+                console.log(err);
+            }
+        }
+    }
+
     handleMessage(message: string){
         const data = this.isJSON(message);
+        // Check if data from message is valid
         if(data == null) return;
-        if(data.id == null || data.stage == null || data.time == null) return;
-        const msg = data as SocketMessage;
-        if(this.callbacks[msg.id]){
-            if(msg.stage){
+        if(data.id == null) return;
+
+        // Check if "stage" exists (only in WatchMessage)
+        if(data.stage){
+            // Call all registered callbacks
+            const msg = data as WatchMessage;
+            if(this.callbacks[msg.id]){
                 const cb = this.callbacks[msg.id] as MonitorWatchCallback;
-                cb(msg.id, msg.stage, msg.block, msg.time);
-            }else{
+                cb(msg.id, msg.stage, msg.block, msg.gas);
+            }
+        }
+        // Check if "block" is an object (only in BlockMessage)
+        else if(typeof data.block === "object"){
+            // Call all registered callbacks
+            const msg = data as BlockMessage;
+            if(this.callbacks[msg.id]){
                 const cb = this.callbacks[msg.id] as MonitorBlockCallback;
-                cb(msg.id, msg.block, msg.time);
+                cb(msg.id, msg.block);
             }
         }
     }

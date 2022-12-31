@@ -6,7 +6,7 @@ import {
     IMintTask,
     IMintTimestampOptions,
     ITask,
-    IWatchTaskOptions
+    IWatchTaskOptions, RetryOptions
 } from "../../../definitions/tasks/TaskTypes";
 
 export class MintTaskProcessor {
@@ -23,7 +23,7 @@ export class MintTaskProcessor {
         if(this.group == null) return false;
 
         if(this.task.taskSettings.monitorSettings.mode === "timestamp"){
-            monitorManager.addMonitorTask(this.blockReceived, "block");
+            this.setUpBlockTimeout();
         }else if(this.task.taskSettings.monitorSettings.mode === "follow"){
             const taskSettings = this.task.taskSettings.monitorSettings as IMintFollowOptions;
 
@@ -38,12 +38,30 @@ export class MintTaskProcessor {
         return true;
     }
 
-    blockReceived(){
+    setUpBlockTimeout(){
+        const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
 
+        const delay = (settings.timestamp-(Date.now()/1000)) * 1000;
+
+        setTimeout(() => {
+
+        }, delay);
+        monitorManager.addMonitorTask(this.firstBlockReceived, "block");
+    }
+
+    firstBlockReceived(){
+        const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
+        if(settings.waitForBlock === true){
+
+        } else{
+            const retrySettings = settings.waitForBlock as RetryOptions;
+
+
+        }
     }
 
     pendingReceived(){
-
+        const settings = this.task.taskSettings.monitorSettings as IMintFollowOptions;
     }
 
     confirmedReceived(){
