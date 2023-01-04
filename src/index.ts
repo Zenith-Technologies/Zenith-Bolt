@@ -6,8 +6,8 @@ import fastify from 'fastify';
 import {RouteRegister} from "./routes/RouteRegister";
 import walletsManager from "./managers/WalletsManager";
 import groupsManager from "./managers/GroupsManager";
-import settingsManager, {IRPCOptions} from "./managers/SettingsManager";
 import {nanoid} from "nanoid";
+import {Monitor} from "./managers/monitors/Monitor";
 const server = fastify();
 
 /*console.log('Starting server...');
@@ -21,16 +21,13 @@ const server = fastify();
     })
 });*/
 
-const settings = settingsManager.fetchSettings();
-
-/*const newRpc: IRPCOptions = {
-    name: "Test RPC",
-    url: "https://api.zmok.io/testnet/kivfhmgzvbouyczj",
-    type: "http"
-}
-
-settings.rpcs[nanoid(6)] = newRpc;
-
-settingsManager.updateSettings(settings);*/
-
-console.log(settingsManager.fetchSettings());
+console.log("Starting monitor...");
+(new Monitor())
+    .on("ready", () => {
+        Monitor.block.on("block", (block) => {
+            console.log(block);
+        })
+    })
+    .on("error", (error: Error) => {
+        console.error(error);
+    })

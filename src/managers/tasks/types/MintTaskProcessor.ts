@@ -8,14 +8,19 @@ import {
     ITask,
     IWatchTaskOptions, RetryOptions
 } from "../../../definitions/tasks/TaskTypes";
+import {BlockObject} from "../../monitors/BlockMonitor";
+import {Monitor} from "../../monitors/Monitor";
+import {ethers} from "ethers";
 
 export class MintTaskProcessor {
     private task: IMintTask;
     private group: IGroup | null;
+    private currentTransaction: ethers.providers.TransactionResponse | null;
 
     constructor(task: ITask) {
         this.task = task as IMintTask;
         this.group = null;
+        this.currentTransaction = null;
     }
 
     startTask(): boolean{
@@ -23,7 +28,9 @@ export class MintTaskProcessor {
         if(this.group == null) return false;
 
         if(this.task.taskSettings.monitorSettings.mode === "timestamp"){
-            this.setUpBlockTimeout();
+            Monitor.block.on("block", (block: BlockObject) => {
+                this.blockReceived(block);
+            })
         }else if(this.task.taskSettings.monitorSettings.mode === "follow"){
             const taskSettings = this.task.taskSettings.monitorSettings as IMintFollowOptions;
 
@@ -38,25 +45,14 @@ export class MintTaskProcessor {
         return true;
     }
 
-    setUpBlockTimeout(){
+    blockReceived(block: BlockObject){
         const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
-
-        const delay = (settings.timestamp-(Date.now()/1000)) * 1000;
-
-        setTimeout(() => {
-
-        }, delay);
-        monitorManager.addMonitorTask(this.firstBlockReceived, "block");
-    }
-
-    firstBlockReceived(){
-        const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
-        if(settings.waitForBlock === true){
-
-        } else{
-            const retrySettings = settings.waitForBlock as RetryOptions;
-
-
+        if(block.timestamp + 12 > settings.timestamp){
+            if(this.currentTransaction === null) {
+                // We are ready to start sending transactions
+            }else{
+                // We need to update transaction gas if option is enabled
+            }
         }
     }
 

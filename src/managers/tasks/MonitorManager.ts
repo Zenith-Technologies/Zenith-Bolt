@@ -56,31 +56,7 @@ class MonitorManager extends EventEmitter{
         this.callbacks = {};
         this.authToken = "";
 
-        axios({
-            url: `${MONITOR_URL}authentication/verify`,
-            method: "POST",
-            data: {
-                license: "abc",
-                identifier: "123",
-            }
-        }).then((resp) => {
-            if(resp?.data?.success){
-                this.authToken = resp.data;
 
-                this.ws = new WebSocket("ws://localhost:2947",{
-                    headers: {
-                        "x-auth": this.authToken
-                    }
-                });
-                this.ws.on("message", this.handleMessage);
-
-                this.emit("ready");
-            }else{
-                this.emit("error");
-            }
-        }).catch(err => {
-            this.emit("error");
-        })
     }
 
     async addMonitorTask(cb: MonitorCallback, type: "watch" | "block", options?: IWatchTaskOptions): Promise<boolean | string>{

@@ -1,5 +1,5 @@
 import {WebSocket, WebSocketServer} from "ws";
-import {IStatus} from "../managers/TasksManager";
+import {IStatus} from "../definitions/tasks/TaskTypes";
 
 export interface UpdateMessage {
     group: number,
