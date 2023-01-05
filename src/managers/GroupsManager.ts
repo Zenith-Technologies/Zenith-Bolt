@@ -1,19 +1,22 @@
 import config from "../utils/StorageHandler";
+import {nanoid} from "nanoid";
 
-export interface IGroup {
+export interface IGroup extends IGroupOptions {
+    id: string
+}
+
+interface IGroupOptions {
     name: string,
     target: string,
     type: "opensea" | "mint",
-    id?: number
 }
 
 interface IGroupStored {
-    [key: number]: IGroup
+    [key: string]: IGroup
 }
 
 class GroupsManager {
     private groups: IGroupStored;
-    private nextGroupId: number;
 
     constructor() {
         this.groups = {};
@@ -24,12 +27,6 @@ class GroupsManager {
             // Delete all groups and group ID if stored incorrectly
             if(configGroups == null) {
                 config.delete("groups");
-                this.nextGroupId = 0;
-                return;
-            }
-            if(!this.isInteger(config.get("groupsId"))){
-                config.delete("groupsId");
-                this.nextGroupId = 0;
                 return;
             }
 
@@ -39,24 +36,22 @@ class GroupsManager {
 
                 this.groups[parsedKey] = configGroups[parsedKey];
             }
-            this.nextGroupId = config.get("groupsId") as number;
-        }else {
-            this.nextGroupId = 0;
         }
     }
 
-    createGroup(group: IGroup): boolean{
-        if(group.id) return false;
+    // TODO Validate target before allowing group creation
+    createGroup(groupOptions: IGroupOptions): IGroup | null{
+        const id = nanoid();
 
-        group.id = this.nextGroupId;
+        const group: IGroup = {
+            id, ...groupOptions
+        }
 
-        this.groups[this.nextGroupId] = group;
-        this.nextGroupId++;
+        this.groups[group.id] = group;
 
         config.set(`groups.${group.id}`, group);
-        config.set("groupsId", this.nextGroupId);
 
-        return true;
+        return group;
     }
 
     editGroup(group: IGroup): boolean{
@@ -73,7 +68,7 @@ class GroupsManager {
         delete this.groups[id];
     }
 
-    getGroup(id: number): IGroup | null{
+    getGroup(id: string): IGroup | null{
         return this.groups[id];
     }
 

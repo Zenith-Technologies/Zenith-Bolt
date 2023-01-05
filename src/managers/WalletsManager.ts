@@ -54,8 +54,8 @@ class WalletsManager {
         }
     }
 
-    createWalletGroup(group: IWalletGroupCreateOptions): boolean{
-        if(group.wallets.length === 0) return false;
+    createWalletGroup(group: IWalletGroupCreateOptions): IWalletGroup | null{
+        if(group.wallets.length === 0) return null;
 
         const groupId = nanoid();
 
@@ -71,7 +71,7 @@ class WalletsManager {
 
         config.set(`walletgroups.${groupId}`, newGroup);
 
-        return true;
+        return newGroup;
     }
 
     restoreWalletGroup(groupId: string): boolean{

@@ -2,7 +2,7 @@ import {WebSocket, WebSocketServer} from "ws";
 import {IStatus} from "../definitions/tasks/TaskTypes";
 
 export interface UpdateMessage {
-    group: number,
+    group: string,
     task: string,
     oldStatus: IStatus,
     newStatus: IStatus

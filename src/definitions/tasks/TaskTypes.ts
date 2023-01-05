@@ -1,5 +1,5 @@
 // All possible task statuses
-export type IStatus = "stopped" | "starting" | "monitoring" | "processing" | "waiting" | "successful" | "failed" | "error";
+export type IStatus = "created" | "stopped" | "starting" | "monitoring" | "processing" | "waiting" | "successful" | "failed" | "error";
 
 // Completed task interface (has ID and status)
 export interface ITask extends ITaskOptions{
@@ -11,11 +11,11 @@ export interface ITaskOptions {
     // Account ID to run task for
     account: string,
     // Group ID task belongs to
-    group: number,
+    group: string,
     // Task settings
     taskSettings: IMintTaskOptions | ICustomModuleTaskOptions,
     // Txn send settings
-    transactonSettings: ITransactionSettingsOptions
+    transactionSettings: ITransactionSettingsOptions
 }
 
 export interface IMintTask extends ITask {
@@ -30,7 +30,9 @@ export interface ITransactionSettingsOptions {
     // List of RPC node IDs to send txn through
     nodes: string[],
     // Gas settings
-    gas: IGasAutoOptions | IGasProvidedOptions
+    gas: IGasAutoOptions | IGasProvidedOptions,
+    autoGas: boolean,
+    nonce?: number
 }
 
 export interface IGasAutoOptions {
@@ -82,8 +84,7 @@ export interface IMintFollowOptions {
 export interface IMintTimestampOptions {
     mode: "timestamp",
     // Timestamp to send txn at
-    timestamp: number,
-    waitForBlock: RetryOptions | true
+    timestamp: number
 }
 
 export interface RetryOptions {

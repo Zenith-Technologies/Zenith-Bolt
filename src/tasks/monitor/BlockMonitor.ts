@@ -8,6 +8,12 @@ export interface BlockObject {
     baseFee: number
 }
 
+export interface BlockMessage {
+    id: string
+    block: BlockObject,
+    time: string
+}
+
 export class BlockMonitor extends EventEmitter{
     private ws: WebSocket;
 
@@ -21,7 +27,6 @@ export class BlockMonitor extends EventEmitter{
     }
 
     private handleMessage(message: string){
-        console.log(message);
         const data = this.isJSON(message);
         // Check if data from message is valid
         if(data == null) return;
