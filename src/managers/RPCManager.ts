@@ -25,23 +25,45 @@ interface IRPCInstanceStorage {
     [key: string]: ethers.providers.JsonRpcProvider | ethers.providers.WebSocketProvider;
 }
 
+interface IRPCCallback {
+    (block: number): void
+}
+
 class RPCManager extends EventEmitter{
     private rpc :IRPCStorage
     private instances: IRPCInstanceStorage;
+    private rpcBlocks: {
+        [key: string]: number
+    }
 
     constructor() {
         super();
 
         this.instances = {};
+        this.rpcBlocks = {};
         this.rpc = config.get("rpc",{}) as IRPCStorage;
 
         for(let rpcId in this.rpc){
             const rpc = this.rpc[rpcId];
 
+            // Add RPC and block event for callbacks
             if(rpc.type === "http"){
-                this.instances[rpcId] = new ethers.providers.JsonRpcProvider(rpc.url);
+                const provider = new ethers.providers.JsonRpcProvider(rpc.url);
+
+                // TODO Make this configurable
+                provider.pollingInterval = 500;
+
+                provider.on("block", (block) => {
+                    this.rpcBlocks[rpcId] = block;
+                })
+
+                this.instances[rpcId] = provider;
             }else if(rpc.type === "ws"){
                 this.instances[rpcId] = new ethers.providers.WebSocketProvider(rpc.url);
+
+                this.instances[rpcId].on("block", (block) => {
+                    this.rpcBlocks[rpcId] = block;
+                })
             }
         }
     }
@@ -67,9 +89,25 @@ class RPCManager extends EventEmitter{
         }
 
         if(finalizedRPC.type === "http"){
-            this.instances[id] = new ethers.providers.JsonRpcProvider(finalizedRPC.url);
+            const provider = new ethers.providers.JsonRpcProvider(finalizedRPC.url);
+
+            // TODO Make this configurable
+            provider.pollingInterval = 500;
+
+            provider.on("block", (block) => {
+                this.rpcBlocks[id] = block;
+            })
+
+            this.instances[id] = provider;
+
         }else if(finalizedRPC.type === "ws"){
-            this.instances[id] = new ethers.providers.WebSocketProvider(finalizedRPC.url);
+            const provider = new ethers.providers.WebSocketProvider(finalizedRPC.url);
+
+            provider.on("block", (block) => {
+                this.rpcBlocks[id] = block;
+            })
+
+            this.instances[id] = provider;
         }
 
         this.rpc[id] = finalizedRPC;
@@ -86,10 +124,18 @@ class RPCManager extends EventEmitter{
     removeRPC(id: string){
         if (this.rpc[id]){
             delete this.rpc[id];
+
+            this.instances[id].removeAllListeners("block");
+
             delete this.instances[id];
+            delete this.rpcBlocks[id];
 
             config.set("rpc", this.rpc);
         }
+    }
+
+    getRPCBlock(id: string): number{
+        return this.rpcBlocks[id] ?? -1;
     }
 }
 

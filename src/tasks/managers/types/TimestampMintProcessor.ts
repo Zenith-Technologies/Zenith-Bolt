@@ -10,14 +10,14 @@ import groupsManager, {IGroup} from "../../../managers/GroupsManager";
 import { Monitor } from "../../monitor/Monitor";
 import {TaskProcessor} from "../../../definitions/tasks/TaskProcessor";
 import {EventEmitter} from "events";
-import {CheckoutProcessor} from "../../checkout/CheckoutProcessor";
+import {TimestampCheckoutProcessor} from "../../checkout/TimestampCheckoutProcessor";
 import {BlockMessage, BlockObject} from "../../monitor/BlockMonitor";
 
 export class TimestampMintProcessor extends EventEmitter implements TaskProcessor {
     private task: IMintTask;
     private group: IGroup | null;
     private status: IStatus;
-    private transaction: CheckoutProcessor | null;
+    private transaction: TimestampCheckoutProcessor | null;
 
     constructor(task: ITask) {
         super();
@@ -53,11 +53,11 @@ export class TimestampMintProcessor extends EventEmitter implements TaskProcesso
 
     blockReceived(block: BlockObject){
         const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
-        console.log("received block timestamp", block.timestamp);
-        if(block.timestamp + 12 > settings.timestamp && this.transaction == null){
+        const attemptFirstBlock = settings.attemptFirstBlock && settings.firstBlockGasLimit;
+        if((block.timestamp + 12 > settings.timestamp && attemptFirstBlock) || (block.timestamp > settings.timestamp && !attemptFirstBlock) && this.transaction == null){
             console.log("sending valid block timestamp txn")
             // Ready to send transactions
-            this.transaction = new CheckoutProcessor(this.task, this.group as IGroup);
+            this.transaction = new TimestampCheckoutProcessor(this.task, this.group as IGroup, block.timestamp);
             this.transaction.createTransactionObject();
         }
     }

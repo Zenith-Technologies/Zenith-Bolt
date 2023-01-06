@@ -31,8 +31,12 @@ export interface ITransactionSettingsOptions {
     nodes: string[],
     // Gas settings
     gas: IGasAutoOptions | IGasProvidedOptions,
+    // Whether to automatically calculate gas
     autoGas: boolean,
-    nonce?: number
+    // Transaction nonce
+    nonce?: number,
+    // Transaction gas limit
+    gasLimit?: number
 }
 
 export interface IGasAutoOptions {
@@ -84,7 +88,11 @@ export interface IMintFollowOptions {
 export interface IMintTimestampOptions {
     mode: "timestamp",
     // Timestamp to send txn at
-    timestamp: number
+    timestamp: number,
+    // Should bot attempt minting first valid block
+    attemptFirstBlock?: boolean,
+    // Gas limit for first block
+    firstBlockGasLimit?: number
 }
 
 export interface RetryOptions {

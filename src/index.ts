@@ -38,7 +38,7 @@ console.log("Starting monitor...");
             const taskGroup = groupsManager.createGroup({
                 name: "task group 1",
                 type: "mint",
-                target: "0xE7F7b6480a1b777C3cfDF91Cb72f833c3e1af3Fb"
+                target: "0xe1f2A34f839bbBCA32C43A6E1dCA947De1Db916b"
             })
 
             if(taskGroup){
@@ -60,7 +60,7 @@ console.log("Starting monitor...");
                             data: "0xa0712d680000000000000000000000000000000000000000000000000000000000000001",
                             price: 0,
                             monitorSettings: {
-                                timestamp: 1672896450,
+                                timestamp: 1672987620,
                                 mode: "timestamp"
                             }
                         },
