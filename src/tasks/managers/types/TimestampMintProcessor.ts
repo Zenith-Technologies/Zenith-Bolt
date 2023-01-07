@@ -48,17 +48,26 @@ export class TimestampMintProcessor extends EventEmitter implements TaskProcesso
     }
 
     getStatus(): IStatus {
-        return "waiting";
+        return this.status;
     }
 
     blockReceived(block: BlockObject){
+        this.emitStatus("monitoring");
         const settings = this.task.taskSettings.monitorSettings as IMintTimestampOptions;
         const attemptFirstBlock = settings.attemptFirstBlock && settings.firstBlockGasLimit;
         if((block.timestamp + 12 > settings.timestamp && attemptFirstBlock) || (block.timestamp > settings.timestamp && !attemptFirstBlock) && this.transaction == null){
-            console.log("sending valid block timestamp txn")
             // Ready to send transactions
             this.transaction = new TimestampCheckoutProcessor(this.task, this.group as IGroup, block.timestamp);
+            this.emitStatus("processing");
             this.transaction.createTransactionObject();
+
+            this.transaction.on("sent", () => {
+                this.emitStatus("waiting");
+            })
+
+            this.transaction.on("mined", () => {
+                this.emitStatus("successful");
+            })
         }
     }
 

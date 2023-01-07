@@ -38,7 +38,7 @@ console.log("Starting monitor...");
             const taskGroup = groupsManager.createGroup({
                 name: "task group 1",
                 type: "mint",
-                target: "0xe1f2A34f839bbBCA32C43A6E1dCA947De1Db916b"
+                target: "0x1665C40F357b6679eBDf7D36038980e6783A6BE7"
             })
 
             if(taskGroup){
@@ -46,7 +46,7 @@ console.log("Starting monitor...");
 
                 const rpc = rpcManager.addRPC({
                     name: "rpc 1",
-                    url: "https://goerli.infura.io/v3/6365c9b6ee404572ac22977cb2442ced"
+                    url: "https://sepolia.infura.io/v3/6365c9b6ee404572ac22977cb2442ced"
                 })
 
                 if(rpc){
@@ -60,7 +60,7 @@ console.log("Starting monitor...");
                             data: "0xa0712d680000000000000000000000000000000000000000000000000000000000000001",
                             price: 0,
                             monitorSettings: {
-                                timestamp: 1672987620,
+                                timestamp: 1673058360,
                                 mode: "timestamp"
                             }
                         },

@@ -103,7 +103,8 @@ export class TimestampCheckoutProcessor extends EventEmitter{
             const rpcInstance = rpcManager.getRPCInstance(rpc);
 
             const currentBlock = rpcManager.getRPCBlock(rpc);
-            if(currentBlock === this.currentBlock){
+            console.log("rpc block", currentBlock);
+            if(currentBlock >= this.currentBlock){
                 return rpcInstance;
             }
         }
@@ -121,7 +122,7 @@ export class TimestampCheckoutProcessor extends EventEmitter{
             // Set up functions to cancel when one is found and to alert on event
             allWaits.push(new Promise((resolve) => {
                 const alertFunc = (number: number) => {
-                    if(number === this.currentBlock) {
+                    if(number >= this.currentBlock) {
                         resolve(rpcInstance);
                         return;
                     }
