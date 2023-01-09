@@ -9,7 +9,7 @@ export interface TaskProcessor extends EventEmitter{
     getStatus(): IStatus;
 }
 
-export interface WatchMessage {
+export interface WatchTaskMessage {
     id: string,
     stage: "pending" | "confirmed",
     block: number,

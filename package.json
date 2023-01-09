@@ -9,7 +9,8 @@
     "build-watch": "tsc -p tsconfig.json --watch",
     "build": "tsc -p tsconfig.json",
     "start": "node index.js",
-    "dev": "tsc-watch --onSuccess \"node ./dist\""
+    "dev": "tsc-watch --onSuccess \"node ./dist\"",
+    "compile-schemas": "json2ts -i src/schemas -o src/types/schemas"
   },
   "dependencies": {
     "axios": "^1.2.1",
@@ -19,6 +20,7 @@
     "ethers": "^5.6.9",
     "fastify": "^4.3.0",
     "http-errors": "^2.0.0",
+    "json-schema-to-typescript": "^11.0.2",
     "mongoose": "^6.5.0",
     "nanoid": "3",
     "public-ip": "^6.0.1",

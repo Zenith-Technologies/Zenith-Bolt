@@ -82,7 +82,8 @@ export interface IMintFollowOptions {
     // Address to monitor txns to (if from fromAddress)
     toAddress: string,
     // Retry behavior
-    waitForBlock: RetryOptions | true
+    waitForBlock: RetryOptions | true,
+    gasLimit?: number
 }
 
 export interface IMintTimestampOptions {

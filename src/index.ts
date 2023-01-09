@@ -4,13 +4,16 @@ dotenv.config()
 
 import fastify from 'fastify';
 import {RouteRegister} from "./routes/RouteRegister";
-import walletsManager from "./managers/WalletsManager";
-import groupsManager from "./managers/GroupsManager";
+import walletsManager from "./controllers/WalletsController";
+import groupsManager from "./controllers/GroupsController";
 import {nanoid} from "nanoid";
 import {Monitor} from "./tasks/monitor/Monitor";
 import {ITaskOptions} from "./definitions/tasks/TaskTypes";
-import rpcManager from "./managers/RPCManager";
+import rpcManager from "./controllers/RPCController";
 import taskManager from "./tasks/managers/TaskProcessManager";
+import {ConfigService} from "./services/ConfigService";
+import {RPCService} from "./services/RPCService";
+import {RPCSubscriber, RPCSubscription} from "./subscribers/RPCSubscriber";
 const server = fastify();
 
 /*console.log('Starting server...');
@@ -24,7 +27,7 @@ const server = fastify();
     })
 });*/
 console.log("Starting monitor...");
-(new Monitor())
+/*(new Monitor())
     .on("ready", () => {
         const walletGroup = walletsManager.createWalletGroup({
             name: "wallet group 1",
@@ -38,7 +41,7 @@ console.log("Starting monitor...");
             const taskGroup = groupsManager.createGroup({
                 name: "task group 1",
                 type: "mint",
-                target: "0x1665C40F357b6679eBDf7D36038980e6783A6BE7"
+                target: "0xe7f7b6480a1b777c3cfdf91cb72f833c3e1af3fb"
             })
 
             if(taskGroup){
@@ -46,7 +49,7 @@ console.log("Starting monitor...");
 
                 const rpc = rpcManager.addRPC({
                     name: "rpc 1",
-                    url: "https://sepolia.infura.io/v3/6365c9b6ee404572ac22977cb2442ced"
+                    url: "https://goerli.infura.io/v3/dbb9984d07904774bed8e005d6a79caa"
                 })
 
                 if(rpc){
@@ -60,8 +63,14 @@ console.log("Starting monitor...");
                             data: "0xa0712d680000000000000000000000000000000000000000000000000000000000000001",
                             price: 0,
                             monitorSettings: {
-                                timestamp: 1673058360,
-                                mode: "timestamp"
+                                mode: "follow",
+                                data: "0x8e920351",
+                                fromAddress: "0xCE5035D51237B4D72f6910D4ecB625E4fD6460Ec",
+                                toAddress: "0xE7F7b6480a1b777C3cfDF91Cb72f833c3e1af3Fb",
+                                waitForBlock: {
+                                    retryOnFail: false
+                                },
+                                gasLimit: 90000
                             }
                         },
                         transactionSettings: {
@@ -84,4 +93,6 @@ console.log("Starting monitor...");
     })
     .on("error", (error: Error) => {
         console.error(error);
-    })
+    })*/
+
+console.log(ConfigService.getGroups());

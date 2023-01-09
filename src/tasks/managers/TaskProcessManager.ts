@@ -4,6 +4,7 @@ import {IStatus, ITask, ITaskOptions} from "../../definitions/tasks/TaskTypes";
 import {TaskProcessor} from "../../definitions/tasks/TaskProcessor";
 import {TimestampMintProcessor} from "./types/TimestampMintProcessor";
 import {nanoid} from "nanoid";
+import {WatchMintProcessor} from "./types/WatchMintProcessor";
 
 class TaskProcessManager extends EventEmitter{
     private taskProcessors: {
@@ -34,6 +35,12 @@ class TaskProcessManager extends EventEmitter{
                 });
             }else if(task.taskSettings.monitorSettings.mode === "follow"){
                 // WatchMintProcessor create here
+                const processor = new WatchMintProcessor(task)
+                this.taskProcessors[task.id] = processor;
+
+                processor.on("update", (task: ITask, oldStatus: IStatus, newStatus: IStatus) => {
+                    this.handleStatusUpdate(task, oldStatus, newStatus);
+                });
             }
         }else if(task.taskSettings.type === "custom"){
             // CustomTaskProcessor create here

@@ -2,10 +2,9 @@ import {IMintTimestampOptions, ITask} from "../../definitions/tasks/TaskTypes";
 import {EventEmitter} from "events";
 import {BlockObject} from "../monitor/BlockMonitor";
 import {BigNumber, ethers, Wallet} from "ethers";
-import {WatchMessage} from "../../definitions/tasks/TaskProcessor";
-import groupsManager, {IGroup} from "../../managers/GroupsManager";
-import rpcManager from "../../managers/RPCManager";
-import walletsManager from "../../managers/WalletsManager";
+import groupsManager, {IGroup} from "../../controllers/GroupsController";
+import rpcManager from "../../controllers/RPCController";
+import walletsManager from "../../controllers/WalletsController";
 
 export class TimestampCheckoutProcessor extends EventEmitter{
     private task: ITask;

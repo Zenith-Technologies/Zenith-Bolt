@@ -6,7 +6,7 @@ import {
     IWatchTaskOptions,
 } from "../../../definitions/tasks/TaskTypes";
 import {ethers} from "ethers";
-import groupsManager, {IGroup} from "../../../managers/GroupsManager";
+import groupsManager, {IGroup} from "../../../controllers/GroupsController";
 import { Monitor } from "../../monitor/Monitor";
 import {TaskProcessor} from "../../../definitions/tasks/TaskProcessor";
 import {EventEmitter} from "events";

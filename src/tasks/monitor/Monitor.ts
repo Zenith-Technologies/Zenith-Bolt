@@ -3,11 +3,18 @@ import axios from "axios";
 import {MONITOR_URL} from "../../utils/Constants";
 import {WebSocket} from "ws";
 import {BlockMonitor} from "./BlockMonitor";
+import {WatchMonitor} from "./WatchMonitor";
+
+export interface WatchTaskInfo {
+    contract: string,
+    owner: string,
+    data: string
+}
 
 export class Monitor extends EventEmitter{
     private token: string;
     static block: BlockMonitor;
-    //static watch: WatchMonitor;
+    static watch: WatchMonitor;
 
     constructor() {
         super();
@@ -31,7 +38,9 @@ export class Monitor extends EventEmitter{
             if(resp?.data?.success){
                 const authToken = resp.data.token;
 
-                this.initializeWebsocket(authToken);
+                this.token = authToken;
+
+                this.initializeWebsocket();
             }else{
                 this.emit("error", new Error("No success value found in reply - possible invalid license"));
             }
@@ -40,37 +49,40 @@ export class Monitor extends EventEmitter{
         })
     }
 
-    private async initializeWebsocket(token: string){
+    private async initializeWebsocket(){
         const ws: WebSocket = new WebSocket("ws://localhost:8080/ws",{
             headers: {
-                "x-auth": token
+                "x-auth": this.token
             }
         });
 
         Monitor.block = new BlockMonitor(ws);
+        Monitor.watch = new WatchMonitor(ws, this.token);
 
-        this.startBlockMonitoring(token);
+        this.startBlockMonitoring();
     }
 
-    private async startBlockMonitoring(token: string){
+    private async startBlockMonitoring(): Promise<boolean>{
         try {
             const response = await axios({
                 url: `${MONITOR_URL}task/block`,
                 method: "POST",
                 data: {},
                 headers: {
-                    "x-auth": token
+                    "x-auth": this.token
                 }
             })
 
             if(response.data?.id){
                 this.emit("ready");
-                return;
+                return true;
             }
 
-            this.emit("error", new Error("Error creating block task - missing data"))
+            throw new Error("Error creating block task - missing data");
         }catch(err){
             this.emit("error", err);
+
+            return false;
         }
     }
 }
