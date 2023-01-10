@@ -1,6 +1,7 @@
 import Conf from "conf";
 import {IGroup, IGroupStorage} from "../types/GroupTypes";
 import {IRPC, IRPCStorage} from "../types/RPCTypes";
+import {IStoredWallet, IWalletGroup, IWalletGroupStorage} from "../types/WalletTypes";
 
 export class ConfigService {
     private static config: Conf;
@@ -33,6 +34,30 @@ export class ConfigService {
 
     static deleteRPC(rpc: IRPC) {
         this.config.delete(`rpcs.${rpc.id}`);
+    }
+
+    static getWalletGroups(): IWalletGroupStorage{
+        return this.config.get(`walletgroups`, {}) as IWalletGroupStorage;
+    }
+
+    static upsertWalletGroup(group: IWalletGroup){
+        this.config.set(`walletgroups.${group.id}`, group);
+    }
+
+    static deleteWalletGroup(group: IWalletGroup){
+        this.config.delete(`walletgroups.${group.id}`);
+    }
+
+    static getWallet(id: string): IStoredWallet{
+        return this.config.get(`wallets.${id}`, {}) as IStoredWallet;
+    }
+
+    static upsertWallet(wallet: IStoredWallet){
+        this.config.set(`wallets.${wallet.id}`, wallet);
+    }
+
+    static deleteWallet(id: string) {
+        this.config.delete(`wallets.${id}`);
     }
 
 }

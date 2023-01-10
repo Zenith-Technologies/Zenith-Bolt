@@ -12,7 +12,7 @@ export class GroupsService {
     }
 
     // TODO Handle errors
-    static upsert(group: IGroupCreateOptions, id: string = nanoid()): IGroup | null{
+    static upsert(group: IGroupCreateOptions, id: string = nanoid()): IGroup{
         const createdGroup: IGroup = {
             id, ...group
         };
@@ -24,12 +24,15 @@ export class GroupsService {
         return createdGroup;
     }
 
-    static get(id: string): IGroup | null{
+    static get(id: string): IGroup | SuccessResponse{
         const group = this.groups[id];
 
         // Check if group with ID existed or not
         if(group == null){
-            return null;
+            return {
+                success: false,
+                message: "Cannot get non-existent group"
+            };
         }
         return group;
     }

@@ -1,6 +1,8 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
 import {GroupsController} from "../controllers/GroupsController";
 import {RPCController} from "../controllers/RPCController";
+import {WalletsService} from "../services/WalletsService";
+import {WalletsController} from "../controllers/WalletsController";
 
 export class RouteRegister {
     private fastify: FastifyInstance
@@ -32,7 +34,33 @@ export class RouteRegister {
     }
 
     public registerWallets(){
+        this.fastify.get("/wallets", {}, (req, reply) => {
+            return WalletsController.get(req);
+        })
 
+        this.fastify.get("/wallets/:id", {}, (req, reply) => {
+            return WalletsController.get(req);
+        })
+
+        this.fastify.post("/wallets", {}, (req, reply) => {
+            return WalletsController.create(req);
+        })
+
+        this.fastify.put("/wallets/:id", {}, (req, reply) => {
+            return WalletsController.update(req);
+        });
+
+        this.fastify.delete("/wallets/:id", {}, (req, reply) => {
+            return WalletsController.delete(req);
+        })
+
+        this.fastify.post("/wallets/:groupId/wallet", {}, (req, reply) => {
+            return WalletsController.addWalletToGroup(req);
+        })
+
+        this.fastify.delete("/wallets/:groupId/wallet/:walletId", {}, (req, reply) => {
+            return WalletsController.deleteWalletFromGroup(req);
+        })
     }
 
     public registerRPCs(){
