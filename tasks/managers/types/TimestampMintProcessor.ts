@@ -4,11 +4,11 @@ import {
     IMintTimestampOptions, IStatus,
     ITask,
     IWatchTaskOptions,
-} from "../../../definitions/tasks/TaskTypes";
+} from "../../../src/definitions/tasks/TaskTypes";
 import {ethers} from "ethers";
-import groupsManager, {IGroup} from "../../../controllers/GroupsController";
+import groupsManager, {IGroup} from "../../../src/controllers/GroupsController";
 import { Monitor } from "../../monitor/Monitor";
-import {TaskProcessor} from "../../../definitions/tasks/TaskProcessor";
+import {TaskProcessor} from "../../../src/definitions/tasks/TaskProcessor";
 import {EventEmitter} from "events";
 import {TimestampCheckoutProcessor} from "../../checkout/TimestampCheckoutProcessor";
 import {BlockMessage, BlockObject} from "../../monitor/BlockMonitor";

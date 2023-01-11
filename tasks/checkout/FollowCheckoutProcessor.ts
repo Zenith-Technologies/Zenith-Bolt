@@ -4,14 +4,14 @@ import {
     IMintTimestampOptions,
     ITask,
     ITransactionSettingsOptions
-} from "../../definitions/tasks/TaskTypes";
+} from "../../src/definitions/tasks/TaskTypes";
 import {EventEmitter} from "events";
 import {BlockObject} from "../monitor/BlockMonitor";
 import {BigNumber, BigNumberish, ethers, Wallet} from "ethers";
-import groupsManager, {IGroup} from "../../controllers/GroupsController";
-import rpcManager from "../../controllers/RPCController";
-import walletsManager, {IFullWallet} from "../../controllers/WalletsController";
-import {WatchTaskMessage} from "../../definitions/tasks/TaskProcessor";
+import groupsManager, {IGroup} from "../../src/controllers/GroupsController";
+import rpcManager from "../../src/controllers/RPCController";
+import walletsManager, {IFullWallet} from "../../src/controllers/WalletsController";
+import {WatchTaskMessage} from "../../src/definitions/tasks/TaskProcessor";
 
 export class FollowCheckoutProcessor extends EventEmitter{
     private task: ITask;

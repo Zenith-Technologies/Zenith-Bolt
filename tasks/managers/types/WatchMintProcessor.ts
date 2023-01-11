@@ -1,7 +1,7 @@
 import {EventEmitter} from "events";
-import {TaskProcessor, WatchTaskMessage} from "../../../definitions/tasks/TaskProcessor";
-import {IMintFollowOptions, IStatus, ITask} from "../../../definitions/tasks/TaskTypes";
-import groupsManager, {IGroup} from "../../../controllers/GroupsController";
+import {TaskProcessor, WatchTaskMessage} from "../../../src/definitions/tasks/TaskProcessor";
+import {IMintFollowOptions, IStatus, ITask} from "../../../src/definitions/tasks/TaskTypes";
+import groupsManager, {IGroup} from "../../../src/controllers/GroupsController";
 import {Monitor} from "../../monitor/Monitor";
 import {FollowCheckoutProcessor} from "../../checkout/FollowCheckoutProcessor";
 import {BlockMessage} from "../../monitor/BlockMonitor";

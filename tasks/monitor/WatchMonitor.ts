@@ -1,9 +1,9 @@
 import {EventEmitter} from "events";
 import {WebSocket} from "ws";
 import axios from "axios";
-import {MONITOR_URL} from "../../utils/Constants";
+import {MONITOR_URL} from "../../src/utils/Constants";
 import {WatchTaskInfo} from "./Monitor";
-import {WatchTaskMessage} from "../../definitions/tasks/TaskProcessor";
+import {WatchTaskMessage} from "../../src/definitions/tasks/TaskProcessor";
 
 export class WatchMonitor extends EventEmitter {
     private ws: WebSocket;

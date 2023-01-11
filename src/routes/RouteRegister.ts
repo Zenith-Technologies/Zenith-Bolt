@@ -11,6 +11,17 @@ export class RouteRegister {
         this.fastify = fastify;
     }
 
+    public initializeRoutes(): FastifyInstance {
+        this.registerGroups();
+        this.registerWallets();
+        this.registerTasks();
+        this.registerSettings();
+        this.registerProxies();
+        this.registerRPCs();
+
+        return this.fastify;
+    }
+
     public registerGroups(){
         this.fastify.get("/groups", {}, (req: FastifyRequest, reply: FastifyReply) => {
             return GroupsController.get(req);

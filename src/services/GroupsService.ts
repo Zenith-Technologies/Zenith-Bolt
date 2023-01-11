@@ -29,11 +29,13 @@ export class GroupsService {
 
         // Check if group with ID existed or not
         if(group == null){
+            console.log(1);
             return {
                 success: false,
                 message: "Cannot get non-existent group"
             };
         }
+        console.log(2);
         return group;
     }
 

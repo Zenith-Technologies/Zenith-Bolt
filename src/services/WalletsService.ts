@@ -44,6 +44,8 @@ export class WalletsService {
 
         this.groups[newGroup.id] = newGroup;
         ConfigService.upsertWalletGroup(newGroup);
+
+        return newGroup;
     }
 
     static updateGroup(id: string, name: string): SuccessResponse{
@@ -110,6 +112,10 @@ export class WalletsService {
         }
         ConfigService.deleteWalletGroup(group);
         delete this.groups[id];
+
+        return {
+            success: true
+        }
     }
 
     static getGroup(id: string): IWalletGroup | SuccessResponse{

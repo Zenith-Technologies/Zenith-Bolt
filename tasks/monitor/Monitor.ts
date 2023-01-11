@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 import axios from "axios";
-import {MONITOR_URL} from "../../utils/Constants";
+import {MONITOR_URL} from "../../src/utils/Constants";
 import {WebSocket} from "ws";
 import {BlockMonitor} from "./BlockMonitor";
 import {WatchMonitor} from "./WatchMonitor";

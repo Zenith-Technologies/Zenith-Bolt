@@ -106,6 +106,7 @@ export class RPCSubscription extends EventEmitter{
 
     // Handles emitting block events
     private async blockHandler(blockNumber: number) {
+        console.log("emitting block", blockNumber);
         this.emit("block", blockNumber);
 
         const block = await this.provider.getBlock(blockNumber);

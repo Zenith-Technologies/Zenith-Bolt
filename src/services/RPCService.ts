@@ -11,12 +11,12 @@ export class RPCService {
         RPCService.rpcs = ConfigService.getRPCs();
 
         // Start the subscriptions
-        for(let rpc: IRPC of Object.values(RPCService.rpcs)){
+        for(let rpc of Object.values(RPCService.rpcs)){
             RPCSubscriber.create(rpc);
         }
     }
 
-    static create(rpc: IRPCOptions): IRPC{
+    static create(rpc: IRPCOptions): IRPC | SuccessResponse{
         let id = nanoid();
 
         // Decides if RPC should become the default
@@ -35,7 +35,10 @@ export class RPCService {
 
         if(type == null){
             // TODO Return error
-            return;
+            return {
+                success: false,
+                message: "invalid rpc url type"
+            };
         }
 
         // Finalizes object
@@ -55,9 +58,14 @@ export class RPCService {
         return finalizedRPC;
     }
 
-    static update(id: string, rpc: IRPCOptions): IRPC | null {
+    static update(id: string, rpc: IRPCOptions): IRPC | SuccessResponse {
         // Verify RPC exists
-        if(this.rpcs[id] == null) return null;
+        if(this.rpcs[id] == null){
+            return {
+                success: false,
+                message: "nonexistent id"
+            }
+        }
 
         // Create default boolean
         let defaultRPC = rpc.default ?? false;
@@ -71,7 +79,10 @@ export class RPCService {
         let type = this.deriveType(rpc.url);
         if(type == null){
             // TODO Return error
-            return;
+            return {
+                success: false,
+                message: "invalid rpc url"
+            };
         }
 
         // Construct RPC object
@@ -112,7 +123,7 @@ export class RPCService {
             delete this.rpcs[id];
 
             if(changeDefault && Object.keys(this.rpcs).length > 0){
-                this.rpcs[Object.keys[this.rpcs][0]].default = true;
+                Object.values(this.rpcs)[0].default = true;
             }
 
             return {

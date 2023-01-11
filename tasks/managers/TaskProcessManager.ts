@@ -1,7 +1,7 @@
-import config from "../../utils/StorageHandler";
+import config from "../../src/utils/StorageHandler";
 import {EventEmitter} from "events";
-import {IStatus, ITask, ITaskOptions} from "../../definitions/tasks/TaskTypes";
-import {TaskProcessor} from "../../definitions/tasks/TaskProcessor";
+import {IStatus, ITask, ITaskOptions} from "../../src/definitions/tasks/TaskTypes";
+import {TaskProcessor} from "../../src/definitions/tasks/TaskProcessor";
 import {TimestampMintProcessor} from "./types/TimestampMintProcessor";
 import {nanoid} from "nanoid";
 import {WatchMintProcessor} from "./types/WatchMintProcessor";

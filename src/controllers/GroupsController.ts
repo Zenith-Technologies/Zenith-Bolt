@@ -1,6 +1,7 @@
 import {IGroupCreateOptions, IGroupStorage} from "../types/GroupTypes";
 import {FastifyRequest} from "fastify";
 import {GroupsService} from "../services/GroupsService";
+import {IDParam} from "../types/QueryParamTypes";
 
 export class GroupsController {
 
@@ -11,7 +12,7 @@ export class GroupsController {
     }
 
     static get(request: FastifyRequest) {
-        const {id} = request.params;
+        const {id} = request.params as IDParam;
 
         if(id){
             return GroupsService.get(id);
@@ -21,14 +22,14 @@ export class GroupsController {
     }
 
     static update(request: FastifyRequest) {
-        const {id} = request.params;
+        const {id} = request.params as IDParam;
         const group = request.body as IGroupCreateOptions;
 
         return GroupsService.upsert(group, id);
     }
 
     static delete(request: FastifyRequest) {
-        const {id} = request.params;
+        const {id} = request.params as IDParam;
 
         return GroupsService.delete(id);
     }
