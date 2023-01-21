@@ -7,23 +7,19 @@ export interface ITask extends ITaskOptions{
     status: IStatus
 }
 
+export type TaskSettings<T> =
+    T extends IMintTaskOptions ? IMintTaskOptions :
+        (T extends ICustomModuleTaskOptions ? ICustomModuleTaskOptions : never);
+
 export interface ITaskOptions {
     // Account ID to run task for
     account: string,
     // Group ID task belongs to
     group: string,
     // Task settings
-    taskSettings: IMintTaskOptions | ICustomModuleTaskOptions,
+    taskSettings: TaskSettings<ICustomModuleTaskOptions> | TaskSettings< IMintTaskOptions>,
     // Txn send settings
     transactionSettings: ITransactionSettingsOptions
-}
-
-export interface IMintTask extends ITask {
-    taskSettings: IMintTaskOptions
-}
-
-export interface ICustomModuleTask extends ITask {
-    taskSettings: ICustomModuleTaskOptions
 }
 
 export interface ITransactionSettingsOptions {
