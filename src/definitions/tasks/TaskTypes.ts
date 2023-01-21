@@ -7,9 +7,13 @@ export interface ITask extends ITaskOptions{
     status: IStatus
 }
 
-export type TaskSettings<T> =
-    T extends IMintTaskOptions ? IMintTaskOptions :
-        (T extends ICustomModuleTaskOptions ? ICustomModuleTaskOptions : never);
+export interface ICustomModuleTask extends ITask {
+    taskSettings: ICustomModuleTaskOptions
+}
+
+export interface IMintTask extends ITask {
+    taskSettings: IMintTaskOptions
+}
 
 export interface ITaskOptions {
     // Account ID to run task for
@@ -17,7 +21,7 @@ export interface ITaskOptions {
     // Group ID task belongs to
     group: string,
     // Task settings
-    taskSettings: TaskSettings<ICustomModuleTaskOptions> | TaskSettings< IMintTaskOptions>,
+    taskSettings: ICustomModuleTaskOptions | IMintTaskOptions,
     // Txn send settings
     transactionSettings: ITransactionSettingsOptions
 }
@@ -52,7 +56,6 @@ export interface IGasProvidedOptions {
 }
 
 export interface ICustomModuleTaskOptions {
-    type: "custom",
     // Name of module to run
     module: string,
     // Data to pass to module
@@ -60,7 +63,6 @@ export interface ICustomModuleTaskOptions {
 }
 
 export interface IMintTaskOptions {
-    type: "mint",
     // Data to send with txn
     data: string,
     // Price to send with txn
