@@ -1,5 +1,5 @@
 import {ethers} from "ethers";
-import {RPCSubscription} from "../subscribers/RPCSubscriber";
+import {RPCSubscription} from "../subscriptions/RPCSubscription";
 
 export interface IRPC extends IRPCOptions{
     id: string,
