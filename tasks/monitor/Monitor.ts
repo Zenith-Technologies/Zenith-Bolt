@@ -27,34 +27,11 @@ export class Monitor extends EventEmitter{
     }
 
     private async startAuthentication(){
-        axios({
-            url: `${MONITOR_URL}authentication/verify`,
-            method: "POST",
-            data: {
-                license: "abc",
-                identifier: "123",
-            }
-        }).then((resp) => {
-            if(resp?.data?.success){
-                const authToken = resp.data.token;
 
-                this.token = authToken;
-
-                this.initializeWebsocket();
-            }else{
-                this.emit("error", new Error("No success value found in reply - possible invalid license"));
-            }
-        }).catch(err => {
-            this.emit("error", err);
-        })
     }
 
     private async initializeWebsocket(){
-        const ws: WebSocket = new WebSocket("ws://localhost:8080/ws",{
-            headers: {
-                "x-auth": this.token
-            }
-        });
+
 
         Monitor.block = new BlockMonitor(ws);
         Monitor.watch = new WatchMonitor(ws, this.token);
