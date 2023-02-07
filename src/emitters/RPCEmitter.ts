@@ -1,7 +1,7 @@
 import {EventEmitter} from "events";
 import {ethers} from "ethers";
 
-export class RPCSubscription extends EventEmitter{
+export class RPCEmitter extends EventEmitter{
     private provider: ethers.providers.BaseProvider;
 
     // Subscribes to block events and emits them through the event emitter
@@ -29,6 +29,10 @@ export class RPCSubscription extends EventEmitter{
     delete(){
         this.emit("deleted");
         this.removeAllListeners();
+    }
+
+    getProvider(){
+        return this.provider;
     }
 
     // Handles emitting block events

@@ -4,6 +4,7 @@ import {RPCController} from "../controllers/RPCController";
 import {WalletsService} from "../services/WalletsService";
 import {WalletsController} from "../controllers/WalletsController";
 
+// Registers all routes
 export class RouteRegister {
     private fastify: FastifyInstance
 

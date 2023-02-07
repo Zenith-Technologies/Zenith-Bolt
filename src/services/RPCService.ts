@@ -1,16 +1,16 @@
 import {IRPC, IRPCOptions, IRPCStorage} from "../types/RPCTypes";
-import {RPCSubscriber, RPCSubscription} from "../subscribers/RPCSubscriber";
+import {RPCSubscriber, RPCEmitter} from "../subscribers/RPCSubscriber";
 import {nanoid} from "nanoid";
-import {ConfigService} from "./ConfigService";
+import {ConfigModel} from "../models/ConfigModel";
 import {SuccessResponse} from "../types/ResponseTypes";
 
 export class RPCService {
     private static rpcs: IRPCStorage;
 
     constructor() {
-        RPCService.rpcs = ConfigService.getRPCs();
+        RPCService.rpcs = ConfigModel.getRPCs();
 
-        // Start the subscriptions
+        // Start the emitters
         for(let rpc of Object.values(RPCService.rpcs)){
             RPCSubscriber.create(rpc);
         }
@@ -41,6 +41,9 @@ export class RPCService {
             };
         }
 
+        const emitter = RPCSubscriber.create(finalizedRPC);
+        if(emitter == null) throw new Error("emitter failed");
+
         // Finalizes object
         const finalizedRPC: IRPC = {
             default: defaultRPC,
@@ -48,11 +51,12 @@ export class RPCService {
             id,
             name: rpc.name,
             url: rpc.url,
-            settings: rpc.settings
+            settings: rpc.settings,
+            emitter: emitter
         }
 
-        RPCSubscriber.create(finalizedRPC);
-        ConfigService.upsertRPC(finalizedRPC);
+
+        ConfigModel.upsertRPC(finalizedRPC);
         this.rpcs[id] = finalizedRPC;
 
         return finalizedRPC;
@@ -92,17 +96,18 @@ export class RPCService {
             id,
             name: rpc.name,
             url: rpc.url,
-            settings: rpc.settings
+            settings: rpc.settings,
+            emitter: this.rpcs[id].emitter
         }
 
         RPCSubscriber.update(finalizedRPC);
-        ConfigService.upsertRPC(finalizedRPC);
+        ConfigModel.upsertRPC(finalizedRPC);
         this.rpcs[id] = finalizedRPC;
 
         return finalizedRPC;
     }
 
-    static get(id: string): IRPC | null {
+    static get(id: string): IRPC{
         return this.rpcs[id];
     }
 
@@ -118,7 +123,7 @@ export class RPCService {
             let changeDefault = rpc.default;
 
             RPCSubscriber.delete(rpc.id);
-            ConfigService.deleteRPC(rpc);
+            ConfigModel.deleteRPC(rpc);
 
             delete this.rpcs[id];
 
@@ -146,3 +151,5 @@ export class RPCService {
         }
     }
 }
+
+new RPCService();

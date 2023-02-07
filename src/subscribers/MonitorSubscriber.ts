@@ -4,7 +4,7 @@ import {IMintTaskOptions} from "../types/TaskOptionTypes";
 import {FollowAPITask} from "../types/FollowAPITypes";
 import {IMintFollowOptions} from "../types/TaskMonitorTypes";
 import {FollowAPIService} from "../services/FollowAPIService";
-import {FollowMonitorSubscription} from "../subscriptions/FollowMonitorSubscription";
+import {FollowMonitorSubscription} from "../emitters/FollowMonitorSubscription";
 
 export class MonitorSubscriber {
 
@@ -30,7 +30,7 @@ export class MonitorSubscriber {
 
                 FollowAPIService.follow(monitorTask).then((result) => {
                     if(result){
-                        // TODO Probably allow for tracking and cancelling these subscriptions
+                        // TODO Probably allow for tracking and cancelling these emitters
                         new FollowMonitorSubscription(task, result);
                     }
                 })

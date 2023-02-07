@@ -1,27 +1,56 @@
-import {ICustomModuleTaskOptions, IMintTaskOptions} from "./TaskOptionTypes";
-import {IStatus} from "./TaskStatusTypes";
-import {ITransactionSettingsOptions} from "./TransactionSettingsTypes";
-
-export interface IMintTask extends ITask {
-    taskSettings: IMintTaskOptions
+export interface ITaskStorage {
+    [key: string]: ITask
 }
 
-export interface ICustomTask extends ITask {
-    taskSettings: ICustomModuleTaskOptions
-}
-
-export interface ITask extends ITaskOptions {
+export interface ITask extends ITaskOptions{
     id: string,
-    status: IStatus
+    status: "created" | "stopped" | "starting" | "monitoring" | "processing" | "waiting" | "successful" | "failed" | "error"
 }
 
 export interface ITaskOptions {
-    // Account ID to run task for
-    account: string,
-        // Group ID task belongs to
+    wallet: string,
     group: string,
-    // Task settings
-    taskSettings: ICustomModuleTaskOptions | IMintTaskOptions,
-    // Txn send settings
-    transactionSettings: ITransactionSettingsOptions
+    mode: TaskModeOptions,
+    transaction: TransactionOptions
 }
+
+export type TaskModeOptions = {
+    type: "follow",
+    addressToWatch: string,
+    destinationToWatch: string,
+    dataToWatch: string,
+    firstBlockMint: RetryOptions
+} | {
+    type: "timestamp",
+    timestamp: number,
+    firstBlockMint: RetryOptions
+} | {
+    type: "custom",
+    moduleData: string
+}
+
+export interface TransactionOptions {
+    rpc: string,
+    additionalRPCs: string[],
+    gas: GasOptions,
+    nonce?: number,
+    data: string,
+    value: number
+}
+
+type GasOptions = {
+    type: "auto",
+    gasFactor: number,
+    gasLimit?: number
+} | {
+    type: "provided",
+    maxPriorityFeePerGas: number,
+    maxFeePerGas: number,
+    gasLimit?: number
+}
+
+type RetryOptions = {attemptMint: false} | {
+        attemptMint: true,
+        attemptGasLimit: number,
+        retryIfFailed: boolean
+    }

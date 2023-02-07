@@ -1,10 +1,11 @@
 import {ethers} from "ethers";
-import {RPCSubscription} from "../subscriptions/RPCSubscription";
+import {RPCEmitter} from "../emitters/RPCEmitter";
 
 export interface IRPC extends IRPCOptions{
     id: string,
     default: boolean,
-    type: "http" | "ws"
+    type: "http" | "ws",
+    emitter: RPCEmitter
 }
 
 export interface IRPCOptions {
@@ -22,7 +23,7 @@ export interface IRPCStorage {
 
 export interface IRPCInstance {
     provider: ethers.providers.BaseProvider,
-    subscription: RPCSubscription
+    subscription: RPCEmitter
 }
 
 export interface IRPCInstanceStorage {

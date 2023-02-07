@@ -2,12 +2,13 @@ import Conf from "conf";
 import {IGroup, IGroupStorage} from "../types/GroupTypes";
 import {IRPC, IRPCStorage} from "../types/RPCTypes";
 import {IStoredWallet, IWalletGroup, IWalletGroupStorage} from "../types/WalletTypes";
+import {ITask, ITaskOptions, ITaskStorage} from "../types/TaskTypes";
 
-export class ConfigService {
+export class ConfigModel {
     private static config: Conf;
 
     constructor() {
-        ConfigService.config = new Conf();
+        ConfigModel.config = new Conf();
     }
 
     static getGroups(): IGroupStorage {
@@ -21,6 +22,18 @@ export class ConfigService {
 
     static deleteGroup(group: IGroup) {
         this.config.delete(`groups.${group.id}`);
+    }
+
+    static getTasks(): ITaskStorage {
+        return this.config.get("tasks", {}) as ITaskStorage;
+    }
+
+    static upsertTask(task: ITask) {
+
+    }
+
+    static deleteTask(task: ITask) {
+
     }
 
     static getRPCs(): IRPCStorage {
@@ -62,4 +75,4 @@ export class ConfigService {
 
 }
 
-new ConfigService();
+new ConfigModel();

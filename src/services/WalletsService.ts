@@ -6,7 +6,7 @@ import {
     IWalletGroupStorage,
     IWalletOptions
 } from "../types/WalletTypes";
-import {ConfigService} from "./ConfigService";
+import {ConfigModel} from "../models/ConfigModel";
 import {SuccessResponse} from "../types/ResponseTypes";
 import {nanoid} from "nanoid";
 import {ethers} from "ethers";
@@ -15,7 +15,7 @@ export class WalletsService {
 
     private static groups: IWalletGroupStorage;
     constructor() {
-        WalletsService.groups = ConfigService.getWalletGroups();
+        WalletsService.groups = ConfigModel.getWalletGroups();
     }
 
     static upsertGroup(group: IWalletGroupOptions): IWalletGroup | SuccessResponse{
@@ -43,7 +43,7 @@ export class WalletsService {
         newGroup.wallets = this.convertWallets(group.wallets);
 
         this.groups[newGroup.id] = newGroup;
-        ConfigService.upsertWalletGroup(newGroup);
+        ConfigModel.upsertWalletGroup(newGroup);
 
         return newGroup;
     }
@@ -73,7 +73,7 @@ export class WalletsService {
         const toRemove = this.groups[groupId].wallets.findIndex(wallet => wallet.id === walletId);
         this.groups[groupId].wallets.splice(toRemove, 1);
 
-        ConfigService.deleteWallet(walletId);
+        ConfigModel.deleteWallet(walletId);
 
         return {
             success: true
@@ -93,7 +93,7 @@ export class WalletsService {
 
         groupToAddTo.wallets.push(newWallet[0]);
 
-        ConfigService.upsertWalletGroup(groupToAddTo);
+        ConfigModel.upsertWalletGroup(groupToAddTo);
 
         return newWallet[0];
     }
@@ -108,9 +108,9 @@ export class WalletsService {
         const group = this.groups[id];
 
         for(let wallet of group.wallets){
-            ConfigService.deleteWallet(wallet.id);
+            ConfigModel.deleteWallet(wallet.id);
         }
-        ConfigService.deleteWalletGroup(group);
+        ConfigModel.deleteWalletGroup(group);
         delete this.groups[id];
 
         return {
@@ -132,13 +132,10 @@ export class WalletsService {
         return Object.values(this.groups);
     }
 
-    static getWallet(id: string): IStoredWallet | SuccessResponse{
-        const toReturn = ConfigService.getWallet(id);
+    static getWallet(id: string): IStoredWallet{
+        const toReturn = ConfigModel.getWallet(id);
         if(toReturn == null){
-            return {
-                success: false,
-                message: "Cannot get nonexistent wallet"
-            }
+            throw new Error("nonexistent wallet")
         }
         return toReturn;
     }
@@ -159,10 +156,12 @@ export class WalletsService {
                 privateKey: wallet.privateKey
             }
 
-            ConfigService.upsertWallet(storedWallet);
+            ConfigModel.upsertWallet(storedWallet);
             newWallets.push(newWallet);
         }
 
         return newWallets;
     }
 }
+
+new WalletsService();

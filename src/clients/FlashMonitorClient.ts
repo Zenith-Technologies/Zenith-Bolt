@@ -1,23 +1,30 @@
+// This is a single file that wraps around Zenith-Flash (flipstate alerts)
 import axios from "axios";
 import {MONITOR_URL} from "../utils/Constants";
-import {WebSocket} from "ws";
+import WebSocket from "ws";
+import {FollowAPISubscription} from "../emitters/FollowAPISubscription";
 import {EventEmitter} from "events";
-import {FollowAPISubscription} from "../subscriptions/FollowAPISubscription";
-import {WatchTaskInfo} from "../../tasks/monitor/Monitor";
-import {FollowAPITask} from "../types/FollowAPITypes";
+import {FlashMonitorEmitter} from "../emitters/FlashMonitorEmitter";
+import {IMonitorTask, IMonitorTaskOptions} from "../types/TaskMonitorTypes";
 
-export class FollowAPIService{
-
+export class FlashMonitorClient {
     private ws: WebSocket;
     private static token: string;
     public static subscriber: FollowAPISubscription;
     private static ready: boolean = false;
+    private static monitorEmitter: FlashMonitorEmitter;
+
+    public static emitter: EventEmitter;
 
     constructor() {
+        FlashMonitorClient.emitter = new EventEmitter();
         this.authenticate();
     }
 
-    public static async follow(taskInfo: FollowAPITask): Promise<string | false> {
+    public static async follow(taskInfo: IMonitorTaskOptions): Promise<{
+        task: IMonitorTask,
+        emitter: EventEmitter
+    } | false> {
         try {
             const resp = await axios({
                 url: `${MONITOR_URL}task/watch`,
@@ -29,7 +36,16 @@ export class FollowAPIService{
             });
 
             if (resp?.data?.id) {
-                return resp.data.id;
+                const task: IMonitorTask = {
+                    id: resp.data.id,
+                    ...taskInfo
+                }
+
+                const emitter = this.monitorEmitter.add(task);
+
+                return {
+                    task, emitter
+                };
             } else {
                 throw new Error("No success value found in reply - possible invalid license");
             }
@@ -54,6 +70,7 @@ export class FollowAPIService{
                 throw new Error("No success value found in reply - possible invalid license");
             }
         }catch(err){
+            FlashMonitorClient.emitter.emit("err", err);
             throw err;
         }
     }
@@ -68,13 +85,14 @@ export class FollowAPIService{
             }
         }).then((resp) => {
             if(resp?.data?.success){
-                FollowAPIService.token = resp.data.token;
+                FlashMonitorClient.token = resp.data.token;
 
                 this.connect();
             }else{
                 throw new Error("No success value found in reply - possible invalid license");
             }
         }).catch(err => {
+            FlashMonitorClient.emitter.emit("err", err);
             throw err;
         })
     }
@@ -82,16 +100,20 @@ export class FollowAPIService{
     private connect(){
         this.ws = new WebSocket("ws://localhost:8080/ws",{
             headers: {
-                "x-auth": FollowAPIService.token
+                "x-auth": FlashMonitorClient.token
             }
         });
 
-        FollowAPIService.ready = true;
-        FollowAPIService.subscriber = new FollowAPISubscription(this.ws);
+        FlashMonitorClient.monitorEmitter = new FlashMonitorEmitter(this.ws);
+
+        FlashMonitorClient.emitter.emit("ready");
+        FlashMonitorClient.ready = true;
+        FlashMonitorClient.subscriber = new FollowAPISubscription(this.ws);
     }
 
     static isReady(){
         return this.ready;
     }
-
 }
+
+new FlashMonitorClient();

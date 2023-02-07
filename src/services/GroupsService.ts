@@ -1,4 +1,4 @@
-import {ConfigService} from "./ConfigService";
+import {ConfigModel} from "../models/ConfigModel";
 import {IGroup, IGroupCreateOptions, IGroupStorage} from "../types/GroupTypes";
 import {nanoid} from "nanoid";
 import {SuccessResponse} from "../types/ResponseTypes";
@@ -8,7 +8,7 @@ export class GroupsService {
     private static groups: IGroupStorage;
 
     constructor() {
-        GroupsService.groups = ConfigService.getGroups();
+        GroupsService.groups = ConfigModel.getGroups();
     }
 
     // TODO Handle errors
@@ -19,23 +19,18 @@ export class GroupsService {
 
         this.groups[id] = createdGroup;
 
-        ConfigService.upsertGroup(createdGroup);
+        ConfigModel.upsertGroup(createdGroup);
 
         return createdGroup;
     }
 
-    static get(id: string): IGroup | SuccessResponse{
+    static get(id: string): IGroup{
         const group = this.groups[id];
 
         // Check if group with ID existed or not
         if(group == null){
-            console.log(1);
-            return {
-                success: false,
-                message: "Cannot get non-existent group"
-            };
+            throw new Error("Group does not exist");
         }
-        console.log(2);
         return group;
     }
 
@@ -48,7 +43,7 @@ export class GroupsService {
         if(group) {
             // TODO Delete all tasks belonging to group
             // TasksService.deleteGroup(group);
-            ConfigService.deleteGroup(group);
+            ConfigModel.deleteGroup(group);
             delete this.groups[id];
 
             return {

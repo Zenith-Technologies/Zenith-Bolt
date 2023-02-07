@@ -1,26 +1,26 @@
-export interface IMintFollowOptions {
-    mode: "follow",
-    // Data to monitor for in txn
-    data: string,
-    // Address to monitor txns from
-    fromAddress: string,
-    // Address to monitor txns to (if from fromAddress)
-    toAddress: string,
-    // Retry behavior
-    waitForBlock: RetryOptions | true,
-    gasLimit?: number
+import {EventEmitter} from "events";
+
+export interface IMonitorClientMessage {
+    id: string,
+    stage: "pending" | "confirmed",
+    block: number,
+    gas: {
+        maxPriorityFeePerGas: number,
+        maxFeePerGas: number
+    },
+    hash: string
 }
 
-export interface IMintTimestampOptions {
-    mode: "timestamp",
-    // Timestamp to send txn at
-    timestamp: number,
-    // Should bot attempt minting first valid block
-    attemptFirstBlock?: boolean,
-    // Gas limit for first block
-    firstBlockGasLimit?: number
+export interface IMonitorTaskOptions {
+    contract: string,
+    owner: string,
+    data: string
 }
 
-export interface RetryOptions {
-    retryOnFail: boolean
+export interface IMonitorTask extends IMonitorTaskOptions {
+    id: string
+}
+
+export interface MonitorEmitterStorage {
+    [key: string]: EventEmitter
 }
