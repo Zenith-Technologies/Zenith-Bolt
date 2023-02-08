@@ -126,7 +126,9 @@ export class TasksController {
         if(metadata == null) return;
         if(metadata.type !== "follow") return;
         metadata.transactionHashesSent.push(...hashes);
-        return hashes;
+
+        // TODO turn this to a request
+        this.waitForFollowTransaction(taskId);
     }
 
     // Sends a transaction given a task ID, the data to send, and if follow transaction is false (timestamp/custom)
@@ -134,7 +136,7 @@ export class TasksController {
 
     }
 
-    static async waitForFollowTransaction(taskId: string, block: number){
+    static async waitForFollowTransaction(taskId: string){
         const task = TasksService.get(taskId);
         if(task == null) throw new Error("Invalid task id");
         const metadata = TasksService.getMetadata(taskId);
@@ -146,54 +148,47 @@ export class TasksController {
 
         // I don't know if this should be in the controller since this is *technically* business logic, but I'll let danny decide if it is and where it goes
         const provider = mainRPC.emitter.getProvider();
-        const blockNumber = await provider.getBlockNumber();
 
-        if(blockNumber < block){
-            provider.on("fullblock", (block: ethers.providers.Block) => {
-                // These variables will track how the task is going after the loops process
-                let taskStatus: "waiting" | "mined" | "minedEarly" | "notMined" = "waiting";
-                let transactionHash: string;
+        provider.on("fullblock", (block: ethers.providers.Block) => {
+            // These variables will track how the task is going after the loops process
+            let taskStatus: "waiting" | "mined" | "minedEarly" | "notMined" = "waiting";
+            let transactionHash: string;
 
-                if(block.transactions.includes(metadata.followingTransaction)){
-                    // Transaction we were following has been mined, let's see if our transactions made it
-                    for(let txn of metadata.transactionHashesSent){
-                        if(block.transactions.includes(txn)){
-                            // A transaction confirmed before ours made it - task success
-                            taskStatus = "mined";
-                            transactionHash = txn;
-                        }
-                    }
-
-                    // If after the loop status hasn't changed, we didn't get mined
-                    if(taskStatus === "waiting"){
-                        taskStatus = "notMined";
-                    }
-                }else{
-                    // Follow transaction still pending, make sure none of the ones we sent made it through
-                    for(let txn of metadata.transactionHashesSent){
-                        if(block.transactions.includes(txn)){
-                            // A transaction confirmed before the follow txn made it - task failed
-                            taskStatus = "minedEarly";
-                            transactionHash = txn;
-                        }
+            if(block.transactions.includes(metadata.followingTransaction)){
+                // Transaction we were following has been mined, let's see if our transactions made it
+                for(let txn of metadata.transactionHashesSent){
+                    if(block.transactions.includes(txn)){
+                        // A transaction confirmed before ours made it - task success
+                        taskStatus = "mined";
+                        transactionHash = txn;
                     }
                 }
 
-                if(taskStatus === "success"){
-                    // Now we need to verify the transaction actually succeeded
-                }else if(taskStatus === "minedEarly"){
-                    // Our transaction mined BEFORE the following transaction - retry transaction after its confirmed
-                }else if(taskStatus === "notMined"){
-                    // Our transaction didn't get mined - simply resend it
-                }else{
-                    // We just continue waiting
+                // If after the loop status hasn't changed, we didn't get mined
+                if(taskStatus === "waiting"){
+                    taskStatus = "notMined";
                 }
-            })
-        }else{
-            const block = await provider.getBlock(blockNumber);
+            }else{
+                // Follow transaction still pending, make sure none of the ones we sent made it through
+                for(let txn of metadata.transactionHashesSent){
+                    if(block.transactions.includes(txn)){
+                        // A transaction confirmed before the follow txn made it - task failed
+                        taskStatus = "minedEarly";
+                        transactionHash = txn;
+                    }
+                }
+            }
 
-
-        }
+            if(taskStatus === "success"){
+                // Now we need to verify the transaction actually succeeded
+            }else if(taskStatus === "minedEarly"){
+                // Our transaction mined BEFORE the following transaction - retry transaction after its confirmed
+            }else if(taskStatus === "notMined"){
+                // Our transaction didn't get mined - simply resend it
+            }else{
+                // We check to ensure the edge case here where the user-provided RPC has slow delivery and the txn has been mined already
+            }
+        });
     }
 
     static async confirmed(taskId: string){
