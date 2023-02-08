@@ -38,6 +38,16 @@ export interface TransactionOptions {
     value: number
 }
 
+export type TaskMetadata = {
+    type: "follow",
+    followingTransaction: string,
+    transactionHashesSent: string[]
+} | {
+    type: "timestamp"
+} | {
+    type: "custom"
+}
+
 type GasOptions = {
     type: "auto",
     gasFactor: number,

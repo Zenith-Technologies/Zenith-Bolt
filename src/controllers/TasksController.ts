@@ -1,5 +1,5 @@
 // Receives all task routes
-import {ITask, ITaskOptions, TaskModeOptions} from "../types/TaskTypes";
+import {ITask, ITaskOptions, TaskMetadata, TaskModeOptions} from "../types/TaskTypes";
 import {MonitorService} from "../services/MonitorService";
 import {TasksService} from "../services/TasksService";
 import axios from "axios";
@@ -71,6 +71,31 @@ export class TasksController {
         const rpc = RPCService.get(task.transaction.rpc);
         const wallet = WalletsService.getWallet(task.wallet);
 
+        // Set metadata
+        if(TasksService.getMetadata(taskId)){
+            let metadata = TasksService.getMetadata(taskId);
+            if(metadata?.type !== "follow"){
+                const metadata: TaskMetadata = {
+                    type: "follow",
+                    followingTransaction: txnData.hash,
+                    transactionHashesSent: []
+                }
+
+                TasksService.upsertMetadata(taskId, metadata);
+            }else {
+                metadata.followingTransaction = txnData.hash;
+            }
+        }else{
+            const metadata: TaskMetadata = {
+                type: "follow",
+                followingTransaction: txnData.hash,
+                transactionHashesSent: []
+            }
+
+            TasksService.upsertMetadata(taskId, metadata);
+        }
+
+
         let toSend = await TransactionBuilderService.buildFollowTransaction(task, group, rpc, wallet, txnData);
 
         // TODO turn this into a request (TransactionRequest is JSON.stringify-able)
@@ -95,6 +120,7 @@ export class TasksController {
         }
 
         const hashes = await TransactionSenderService.send(task, wallet, mainRPC, additionalRPCs, txnData);
+        return hashes;
     }
 
     // Sends a transaction given a task ID, the data to send, and if follow transaction is false (timestamp/custom)
@@ -102,9 +128,10 @@ export class TasksController {
 
     }
 
-    static async waitForBlock(taskId: string, block: number){
+    static async waitForFollowTransaction(taskId: string, block: number){
         const task = TasksService.get(taskId);
         if(task == null) throw new Error("Invalid task id");
+        const metadata = TasksService.getMetadata(taskId);
         const wallet = WalletsService.getWallet(task.wallet);
         const mainRPC = RPCService.get(task.transaction.rpc);
 
