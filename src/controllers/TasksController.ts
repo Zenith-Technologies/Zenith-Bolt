@@ -31,7 +31,7 @@ export class TasksController {
             emitter.on("message", (data: IMonitorClientMessage) => {
                 if (data.stage === "pending") {
                     // TODO Convert this to a request
-                    this.pending(taskId, data);
+                    this.buildFollowTransaction(taskId, data);
 
                     // Psuedocode from here on
                     /*
@@ -51,7 +51,7 @@ export class TasksController {
                     }
                      */
                 } else if (data.stage === "confirmed") {
-                    this.confirmed(taskId, data.block);
+                    this.confirmed(taskId);
                 }
             });
         }else if(task.mode.type === "timestamp"){
@@ -63,45 +63,50 @@ export class TasksController {
         }
     }
 
-    static async pending(taskId: string, txnData?: IMonitorClientMessage){
+    // Builds a transaction given a message from the monitor and a task ID (follow)
+    static async buildFollowTransaction(taskId: string, txnData: IMonitorClientMessage){
         const task = TasksService.get(taskId);
         if(task == null) throw new Error("Invalid task id");
         const group = GroupsService.get(task.group);
-        const rpc = RPCService.get(task.transactionSettings.rpc);
-        const wallet = WalletsService.getWallet(task.account);
+        const rpc = RPCService.get(task.transaction.rpc);
+        const wallet = WalletsService.getWallet(task.wallet);
 
-        let toSend: ethers.providers.TransactionRequest;
-
-        if(txnData){
-            toSend = await TransactionBuilderService.build(task, group, rpc, wallet, txnData);
-        }else{
-            toSend = await TransactionBuilderService.build(task, group, rpc, wallet);
-        }
+        let toSend = await TransactionBuilderService.buildFollowTransaction(task, group, rpc, wallet, txnData);
 
         // TODO turn this into a request (TransactionRequest is JSON.stringify-able)
-        this.followSend(taskId, toSend);
+        this.sendFollowTransaction(taskId, toSend);
     }
 
-    static async followSend(taskId: string, txnData: ethers.providers.TransactionRequest){
+    // Builds a transaction given just the task ID (timestamp/custom)
+    static async buildTransaction(){
+
+    }
+
+    // Sends a transaction given a task ID, the data to send, and if follow transaction is true (follow)
+    static async sendFollowTransaction(taskId: string, txnData: ethers.providers.TransactionRequest){
         const task = TasksService.get(taskId);
         if(task == null) throw new Error("Invalid task id");
-        const wallet = WalletsService.getWallet(task.account);
-        const mainRPC = RPCService.get(task.transactionSettings.rpc);
+        const wallet = WalletsService.getWallet(task.wallet);
+        const mainRPC = RPCService.get(task.transaction.rpc);
         const additionalRPCs = [];
 
-        for(let rpcId of task.transactionSettings.additionalRpcs){
+        for(let rpcId of task.transaction.additionalRPCs){
             additionalRPCs.push(RPCService.get(rpcId));
         }
 
         const hashes = await TransactionSenderService.send(task, wallet, mainRPC, additionalRPCs, txnData);
+    }
+
+    // Sends a transaction given a task ID, the data to send, and if follow transaction is false (timestamp/custom)
+    static async sendTransaction(taskId: string, txnData: ethers.providers.TransactionRequest){
 
     }
 
     static async waitForBlock(taskId: string, block: number){
         const task = TasksService.get(taskId);
         if(task == null) throw new Error("Invalid task id");
-        const wallet = WalletsService.getWallet(task.account);
-        const mainRPC = RPCService.get(task.transactionSettings.rpc);
+        const wallet = WalletsService.getWallet(task.wallet);
+        const mainRPC = RPCService.get(task.transaction.rpc);
 
         // I don't know if this should be in the controller since this is *technically* business logic, but I'll let danny decide if it is and where it goes
         const provider = mainRPC.emitter.getProvider();

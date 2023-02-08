@@ -7,8 +7,8 @@ import {IRPC} from "../types/RPCTypes";
 import {IStoredWallet} from "../types/WalletTypes";
 
 export class TransactionBuilderService {
-    // Build, send, and keep track
 
+    // Build, send, and keep track
     static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet): Promise<ethers.providers.TransactionRequest>{
         // Main transaction info
         let transactionObject: ethers.providers.TransactionRequest = {
@@ -39,17 +39,20 @@ export class TransactionBuilderService {
             transactionObject.gasLimit = task.transaction.gas.gasLimit;
         }
 
+        const createdWallet = new ethers.Wallet(wallet.privateKey, rpc.emitter.getProvider());
+
         // Set nonce if user set
         if(task.transaction.nonce){
             transactionObject.nonce = task.transaction.nonce;
+        }else{
+            // We do this so transactions overwrite rather than queue
+            transactionObject.nonce = await createdWallet.getTransactionCount();
         }
-
-        const createdWallet = new ethers.Wallet(wallet.privateKey, rpc.emitter.getProvider());
 
         return await createdWallet.populateTransaction(transactionObject);
     }
 
-    static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>{
+    static async buildFollowTransaction(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>{
         // Make sure task is valid
         if(task.transaction.gas.gasLimit == null) throw new Error("");
 
@@ -68,16 +71,20 @@ export class TransactionBuilderService {
             maxFeePerGas: ethers.utils.parseUnits(txnData.gas.maxFeePerGas + "", "gwei")
         }
 
+        const createdWallet = new ethers.Wallet(wallet.privateKey, rpc.emitter.getProvider());
+
         // Set nonce if user set
         if(task.transaction.nonce){
             transactionObject.nonce = task.transaction.nonce;
+        }else{
+            // We do this so transactions overwrite rather than queue
+            transactionObject.nonce = await createdWallet.getTransactionCount();
         }
 
+        // Make sure txn is valid
         if(txnData.stage === "pending" && transactionObject.gasLimit == null){
             throw new Error("gas limit must be provided for follow txns");
         }
-
-        const createdWallet = new ethers.Wallet(wallet.privateKey, rpc.emitter.getProvider());
 
         return await createdWallet.populateTransaction(transactionObject);
     }
