@@ -50,12 +50,35 @@ export class TasksController {
 
                     }
                      */
-                } else if (data.stage === "confirmed") {
-                    this.confirmed(taskId);
                 }
             });
         }else if(task.mode.type === "timestamp"){
+            if(task.mode.timestamp < (Date.now()/1000)){
+                // We passed the timestamp - mint instantly
+            }else {
+                // Delay until first valid block
+                const provider = RPCService.get(task.transaction.rpc).emitter.getProvider();
 
+                const listener = (block: ethers.providers.Block) => {
+                    if(task.mode.type !== "timestamp") return; /* this will never happen just need it for type infer */
+                    if(block.timestamp + 12 > task.mode.timestamp){
+                        // The block is valid but
+
+                    }
+                }
+
+                setTimeout(() => {
+                    // Mint thangs here
+                    if(task.mode.type !== "timestamp") return; /* this will never happen just need it for type infer */
+
+                    // We wait for next block
+                    const provider = RPCService.get(task.transaction.rpc).emitter.getProvider();
+
+                    provider.once("block", () => {
+                        this.buildTransaction(taskId);
+                    })
+                }, /*seconds between now and time to go*/ task.mode.timestamp - (Date.now()/1000));
+            }
         }else if(task.mode.type === "custom"){
 
         }else{
@@ -95,6 +118,13 @@ export class TasksController {
             TasksService.upsertMetadata(taskId, metadata);
         }
 
+        // Now we have to decide if we send the transaction or skip it
+        if(task.mode.safeMint){
+            // Skip it (minting isn't "guaranteed" so its not safe
+            this.waitForFollowTransaction(taskId);
+            return;
+        }
+
 
         let toSend = await TransactionBuilderService.buildFollowTransaction(task, group, rpc, wallet, txnData);
 
@@ -103,7 +133,13 @@ export class TasksController {
     }
 
     // Builds a transaction given just the task ID (timestamp/custom)
-    static async buildTransaction(){
+    static async buildTransaction(taskId: string, gasLimit?: number){
+        const task = TasksService.get(taskId);
+        if(task == null) throw new Error("Invalid task id");
+        const group = GroupsService.get(task.group);
+        const rpc = RPCService.get(task.transaction.rpc);
+        const wallet = WalletsService.getWallet(task.wallet);
+
 
     }
 
@@ -149,24 +185,29 @@ export class TasksController {
         // I don't know if this should be in the controller since this is *technically* business logic, but I'll let danny decide if it is and where it goes
         const provider = mainRPC.emitter.getProvider();
 
-        provider.on("fullblock", (block: ethers.providers.Block) => {
+        provider.once("fullblock", async (block: ethers.providers.Block) => {
             // These variables will track how the task is going after the loops process
             let taskStatus: "waiting" | "mined" | "minedEarly" | "notMined" = "waiting";
             let transactionHash: string;
 
             if(block.transactions.includes(metadata.followingTransaction)){
-                // Transaction we were following has been mined, let's see if our transactions made it
-                for(let txn of metadata.transactionHashesSent){
-                    if(block.transactions.includes(txn)){
-                        // A transaction confirmed before ours made it - task success
-                        taskStatus = "mined";
-                        transactionHash = txn;
-                    }
-                }
-
-                // If after the loop status hasn't changed, we didn't get mined
-                if(taskStatus === "waiting"){
+                if(task.mode.safeMint){
+                    // Now the follow txn went through, now we can check for mint safety (notMined performs the same thing)
                     taskStatus = "notMined";
+                }else {
+                    // Transaction we were following has been mined, let's see if our transactions made it
+                    for (let txn of metadata.transactionHashesSent) {
+                        if (block.transactions.includes(txn)) {
+                            // A transaction confirmed before ours made it - task success
+                            taskStatus = "mined";
+                            transactionHash = txn;
+                        }
+                    }
+
+                    // If after the loop status hasn't changed, we didn't get mined
+                    if (taskStatus === "waiting") {
+                        taskStatus = "notMined";
+                    }
                 }
             }else{
                 // Follow transaction still pending, make sure none of the ones we sent made it through
@@ -181,6 +222,15 @@ export class TasksController {
 
             if(taskStatus === "success"){
                 // Now we need to verify the transaction actually succeeded
+                const receipt = await provider.getTransactionReceipt(transactionHash);
+
+                if(receipt.status === 1){
+                    // Transaction did not revert, assume success
+                }else if(receipt.status === 0){
+                    // Transaction reverted, assume failure
+                }else{
+                    // Something weird happened
+                }
             }else if(taskStatus === "minedEarly"){
                 // Our transaction mined BEFORE the following transaction - retry transaction after its confirmed
             }else if(taskStatus === "notMined"){
@@ -189,17 +239,6 @@ export class TasksController {
                 // We check to ensure the edge case here where the user-provided RPC has slow delivery and the txn has been mined already
             }
         });
-    }
-
-    static async confirmed(taskId: string){
-        const task = TasksService.get(taskId);
-        if(task == null) throw new Error("Invalid task id");
-
-
-    }
-
-    static followRebuild(taskId: string) {
-        // We rebuild the transaction here without the
     }
 
     static send(){

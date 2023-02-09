@@ -19,14 +19,16 @@ export type TaskModeOptions = {
     addressToWatch: string,
     destinationToWatch: string,
     dataToWatch: string,
-    firstBlockMint: RetryOptions
+    firstBlockMint: RetryOptions,
+    safeMint: boolean
 } | {
     type: "timestamp",
     timestamp: number,
-    firstBlockMint: RetryOptions
+    safeMint: boolean
 } | {
     type: "custom",
-    moduleData: string
+    moduleData: string,
+    safeMint: boolean
 }
 
 export interface TransactionOptions {
@@ -43,7 +45,8 @@ export type TaskMetadata = {
     followingTransaction: string,
     transactionHashesSent: string[]
 } | {
-    type: "timestamp"
+    type: "timestamp",
+    attemptedOnBlock: boolean
 } | {
     type: "custom"
 }
