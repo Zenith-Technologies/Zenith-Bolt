@@ -17,8 +17,7 @@ export class TransactionSenderService {
             transactionHashes.push((await additionalRPC.emitter.getProvider().sendTransaction(signedTxn)).hash);
         }
 
-        // Create an Emitter object using the transaction hashes array
-
+        return transactionHashes;
     }
 
     static resend(){

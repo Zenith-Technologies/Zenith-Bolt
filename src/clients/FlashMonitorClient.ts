@@ -2,15 +2,13 @@
 import axios from "axios";
 import {MONITOR_URL} from "../utils/Constants";
 import WebSocket from "ws";
-import {FollowAPISubscription} from "../emitters/FollowAPISubscription";
 import {EventEmitter} from "events";
 import {FlashMonitorEmitter} from "../emitters/FlashMonitorEmitter";
 import {IMonitorTask, IMonitorTaskOptions} from "../types/TaskMonitorTypes";
 
 export class FlashMonitorClient {
-    private ws: WebSocket;
+    private ws: WebSocket | undefined;
     private static token: string;
-    public static subscriber: FollowAPISubscription;
     private static ready: boolean = false;
     private static monitorEmitter: FlashMonitorEmitter;
 
@@ -108,7 +106,6 @@ export class FlashMonitorClient {
 
         FlashMonitorClient.emitter.emit("ready");
         FlashMonitorClient.ready = true;
-        FlashMonitorClient.subscriber = new FollowAPISubscription(this.ws);
     }
 
     static isReady(){

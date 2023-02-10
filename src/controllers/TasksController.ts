@@ -26,30 +26,14 @@ export class TasksController {
         // res.send(JSON.stringify(task));
 
         if(task.mode.type === "follow"){
-            const {emitter} = await MonitorService.monitor(task);
+            const monitor = await MonitorService.monitor(task);
 
-            emitter.on("message", (data: IMonitorClientMessage) => {
+            if(monitor == null || monitor === false) throw new Error("failed monitoring");
+
+            monitor.emitter.on("message", (data: IMonitorClientMessage) => {
                 if (data.stage === "pending") {
                     // TODO Convert this to a request
                     this.buildFollowTransaction(taskId, data);
-
-                    // Psuedocode from here on
-                    /*
-                    POST /tasks/<id>/follow/pending (pending controller below)
-                    const txnData = FollowTransactionBuilder.build(task, data);
-                    const txnHashes = TransactionSender.send(task, txnData);
-                    const blockEmitters = RPCService.getEmitters([RPC IDS HERE]);
-                    for(let emitter of blockEmitters){
-                        emitter.once("block", (data) => {
-                            if(block.transactions.some(txnHash => txnHashes.includes(txnHash))){
-                                task.status = "success"
-                            }
-                        }
-                    }
-                    if(task.status != "success"){
-
-                    }
-                     */
                 }
             });
         }else if(task.mode.type === "timestamp"){
@@ -188,7 +172,7 @@ export class TasksController {
         provider.once("fullblock", async (block: ethers.providers.Block) => {
             // These variables will track how the task is going after the loops process
             let taskStatus: "waiting" | "mined" | "minedEarly" | "notMined" = "waiting";
-            let transactionHash: string;
+            let transactionHash: string = "";
 
             if(block.transactions.includes(metadata.followingTransaction)){
                 if(task.mode.safeMint){
@@ -220,7 +204,7 @@ export class TasksController {
                 }
             }
 
-            if(taskStatus === "success"){
+            if(taskStatus === "mined"){
                 // Now we need to verify the transaction actually succeeded
                 const receipt = await provider.getTransactionReceipt(transactionHash);
 

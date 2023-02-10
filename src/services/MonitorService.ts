@@ -7,8 +7,6 @@ export class MonitorService {
     }
 
     static async monitor(task: ITask) {
-
-
         if(task.mode.type === "follow"){
             const monitorTask: IMonitorTaskOptions = {
                 contract: task.mode.destinationToWatch,
