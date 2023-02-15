@@ -8,8 +8,19 @@ import {IStoredWallet} from "../types/WalletTypes";
 
 export class TransactionBuilderService {
 
+    static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet): Promise<ethers.providers.TransactionRequest>;
+    static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>;
+
+    static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData?: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>{
+        if(txnData){
+            return this.buildFollowTransaction(task, group, rpc, wallet, txnData);
+        }else{
+            return this.buildTimestampTransaction(task, group, rpc, wallet);
+        }
+    }
+
     // Build, send, and keep track
-    static async build(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet): Promise<ethers.providers.TransactionRequest>{
+    private static async buildTimestampTransaction(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet): Promise<ethers.providers.TransactionRequest>{
         // Main transaction info
         let transactionObject: ethers.providers.TransactionRequest = {
             to: group.target,
@@ -52,7 +63,7 @@ export class TransactionBuilderService {
         return await createdWallet.populateTransaction(transactionObject);
     }
 
-    static async buildFollowTransaction(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>{
+    private static async buildFollowTransaction(task: ITask, group: IGroup, rpc: IRPC, wallet: IStoredWallet, txnData: IMonitorClientMessage): Promise<ethers.providers.TransactionRequest>{
         // Make sure task is valid
         if(task.transaction.gas.gasLimit == null) throw new Error("");
 

@@ -9,7 +9,7 @@ export class TasksService {
     }
 
     constructor() {
-        for(let task: ITask of ConfigModel.getTasks()){
+        for(let task of ConfigModel.getTasks()){
             task.status = "created";
             TasksService.tasks[task.id] = task;
         }
