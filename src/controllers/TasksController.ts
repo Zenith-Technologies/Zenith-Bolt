@@ -72,27 +72,13 @@ export class TasksController {
         const wallet = WalletsService.getWallet(task.wallet);
 
         // Set metadata
-        if(TasksService.getMetadata(taskId)){
-            let metadata = TasksService.getMetadata(taskId);
-            if(metadata?.type !== "follow"){
-                const metadata: TaskMetadata = {
-                    type: "follow",
-                    followingTransaction: txnData.hash,
-                    transactionHashesSent: []
-                }
-
-                TasksService.upsertMetadata(taskId, metadata);
-            }else {
-                metadata.followingTransaction = txnData.hash;
-            }
-        }else{
-            const metadata: TaskMetadata = {
-                type: "follow",
-                followingTransaction: txnData.hash,
-                transactionHashesSent: []
-            }
-
-            TasksService.upsertMetadata(taskId, metadata);
+        let metadata = TasksService.getMetadata(taskId);
+        if(metadata.type !== "follow"){
+            TasksService.upsertMetadata(taskId, {
+                followingTransaction: txnData.hash
+            });
+        }else {
+            metadata.followingTransaction = txnData.hash;
         }
 
         // Now we have to decide if we send the transaction or skip it

@@ -9,9 +9,12 @@ export class TasksService {
     }
 
     constructor() {
-        for(let task of ConfigModel.getTasks()){
+        for(let task of Object.values(ConfigModel.getTasks())){
             task.status = "created";
             TasksService.tasks[task.id] = task;
+
+            // Set metadata
+            this.setDefaultMetadata(task);
         }
     }
 
@@ -19,12 +22,49 @@ export class TasksService {
         return this.tasks[id];
     }
 
-    static getMetadata(id: string): TaskMetadata | undefined{
+    static getMetadata(id: string): TaskMetadata{
         return this.taskMetadata[id];
     }
 
-    static upsertMetadata(id: string, metadata: TaskMetadata) {
-        this.taskMetadata[id] = metadata;
+    static upsertMetadata(id: string, metadata: Partial<TaskMetadata>) {
+        const meta = this.getMetadata(id);
+
+        Object.assign(meta, metadata);
+    }
+
+    /*
+    Default metadata ops
+     */
+    private setDefaultMetadata(task: ITask){
+        if(task.mode.type === "timestamp"){
+            this.setDefaultTimestampMetadata(task);
+        }else if(task.mode.type === "follow"){
+            this.setDefaultFollowMetadata(task);
+        }else if(task.mode.type === "custom"){
+            this.setDefaultCustomMetadata(task);
+        }
+    }
+
+    private setDefaultTimestampMetadata(task: ITask){
+        TasksService.taskMetadata[task.id] = {
+            type: "timestamp",
+            attemptedOnBlock: false,
+            transactionHashesSent: []
+        }
+    }
+
+    private setDefaultFollowMetadata(task: ITask) {
+        TasksService.taskMetadata[task.id] = {
+            type: "follow",
+            followingTransaction: "",
+            transactionHashesSent: []
+        }
+    }
+
+    private setDefaultCustomMetadata(task: ITask) {
+        TasksService.taskMetadata[task.id] = {
+            type: "custom"
+        }
     }
 
 }

@@ -46,7 +46,8 @@ export type TaskMetadata = {
     transactionHashesSent: string[]
 } | {
     type: "timestamp",
-    attemptedOnBlock: boolean
+    attemptedOnBlock: boolean,
+    transactionHashesSent: string[]
 } | {
     type: "custom"
 }
