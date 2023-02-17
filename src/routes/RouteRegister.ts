@@ -3,6 +3,7 @@ import {GroupsController} from "../controllers/GroupsController";
 import {RPCController} from "../controllers/RPCController";
 import {WalletsService} from "../services/WalletsService";
 import {WalletsController} from "../controllers/WalletsController";
+import groupSchemas from "../schemas/groups.schema";
 
 // Registers all routes
 export class RouteRegister {
@@ -24,23 +25,33 @@ export class RouteRegister {
     }
 
     public registerGroups(){
-        this.fastify.get("/groups", {}, (req: FastifyRequest, reply: FastifyReply) => {
+        this.fastify.get("/groups", {
+            schema: groupSchemas.GET_GROUPS
+        }, (req: FastifyRequest, reply: FastifyReply) => {
             return GroupsController.get(req);
         });
 
-        this.fastify.get("/groups/:id", {}, (req, reply) => {
+        this.fastify.get("/groups/:id", {
+            schema: groupSchemas.GET_GROUP_BY_ID
+        }, (req, reply) => {
             return GroupsController.get(req);
         });
 
-        this.fastify.post("/groups", {}, (req, reply) => {
+        this.fastify.post("/groups", {
+            schema: groupSchemas.CREATE_GROUP
+        }, (req, reply) => {
             return GroupsController.create(req);
         });
 
-        this.fastify.put("/groups/:id", {}, (req, reply) => {
+        this.fastify.put("/groups/:id", {
+            schema: groupSchemas.UPDATE_GROUP
+        }, (req, reply) => {
             return GroupsController.update(req);
         });
         
-        this.fastify.delete("/groups/:id", {}, (req, reply) => {
+        this.fastify.delete("/groups/:id", {
+            schema: groupSchemas.DELETE_GROUP
+        }, (req, reply) => {
             return GroupsController.delete(req);
         })
     }

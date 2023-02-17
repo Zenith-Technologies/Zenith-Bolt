@@ -13,6 +13,10 @@
     "compile-schemas": "json2ts -i src/schemas -o src/types/schemas"
   },
   "dependencies": {
+    "@fastify/swagger": "^8.3.1",
+    "@fastify/swagger-ui": "^1.4.0",
+    "@fastify/type-provider-typebox": "^2.4.0",
+    "@sinclair/typebox": "^0.25.23",
     "axios": "^1.2.1",
     "bullmq": "^1.87.0",
     "conf": "^10.2.0",

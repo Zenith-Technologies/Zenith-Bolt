@@ -4,14 +4,18 @@ dotenv.config()
 
 import fastify from 'fastify';
 import {RouteRegister} from "./routes/RouteRegister";
+import {HttpServer} from "./bin/HttpServer";
+import * as http from "http";
 
-console.log('Starting server...');
-const server = (new RouteRegister(fastify())).initializeRoutes();
-server.listen({ port: 8080 }, (err, address) => {
-    if (err) {
-        console.error(err)
-        process.exit(1)
-    }
-    console.log(`Server listening at ${address}`)
-});
-console.log("Starting monitor...");
+async function startServices(){
+    console.log("Starting services...");
+    const httpServer = new HttpServer();
+    await httpServer.registerPlugins();
+    const routeRegister = new RouteRegister(httpServer.getServer());
+    routeRegister.initializeRoutes();
+    await httpServer.postRouteRegistration();
+
+    httpServer.start();
+}
+
+startServices();
