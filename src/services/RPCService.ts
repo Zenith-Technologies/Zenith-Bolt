@@ -1,8 +1,9 @@
-import {IRPC, IRPCOptions, IRPCStorage} from "../types/RPCTypes";
-import {RPCSubscriber, RPCEmitter} from "../subscribers/RPCSubscriber";
+import {IRPC, IRPCIncomplete, IRPCOptions, IRPCStorage} from "../types/RPCTypes";
+import {RPCSubscriber} from "../subscribers/RPCSubscriber";
 import {nanoid} from "nanoid";
 import {ConfigModel} from "../models/ConfigModel";
 import {SuccessResponse} from "../types/ResponseTypes";
+import {RPCEmitter} from "../emitters/RPCEmitter";
 
 export class RPCService {
     private static rpcs: IRPCStorage;
@@ -41,17 +42,22 @@ export class RPCService {
             };
         }
 
-        const emitter = RPCSubscriber.create(finalizedRPC);
-        if(emitter == null) throw new Error("emitter failed");
-
-        // Finalizes object
-        const finalizedRPC: IRPC = {
+        // Create the object
+        let incompleteRPC: IRPCIncomplete = {
             default: defaultRPC,
             type,
             id,
             name: rpc.name,
             url: rpc.url,
-            settings: rpc.settings,
+            settings: rpc.settings
+        }
+
+        const emitter = RPCSubscriber.create(incompleteRPC);
+        if(emitter == null) throw new Error("emitter failed");
+
+        // Overwrite the emitter and finalize object
+        const finalizedRPC: IRPC = {
+            ...incompleteRPC,
             emitter: emitter
         }
 

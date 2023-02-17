@@ -1,11 +1,14 @@
 import {ethers} from "ethers";
 import {RPCEmitter} from "../emitters/RPCEmitter";
 
-export interface IRPC extends IRPCOptions{
+export interface IRPC extends IRPCIncomplete{
+    emitter: RPCEmitter
+}
+
+export interface IRPCIncomplete extends IRPCOptions {
     id: string,
     default: boolean,
     type: "http" | "ws",
-    emitter: RPCEmitter
 }
 
 export interface IRPCOptions {

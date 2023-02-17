@@ -1,7 +1,5 @@
-import {IRPC, IRPCInstance, IRPCInstanceStorage} from "../types/RPCTypes";
-import {RPCService} from "../services/RPCService";
+import {IRPC, IRPCIncomplete, IRPCInstance, IRPCInstanceStorage} from "../types/RPCTypes";
 import {ethers} from "ethers";
-import {EventEmitter} from "events";
 import {RPCEmitter} from "../emitters/RPCEmitter";
 
 export class RPCSubscriber {
@@ -12,7 +10,7 @@ export class RPCSubscriber {
     }
 
     // Creates a new RPC instance
-    static create(rpc: IRPC): RPCEmitter | null{
+    static create(rpc: IRPCIncomplete): RPCEmitter | null{
         let provider: ethers.providers.BaseProvider | null = this.createProvider(rpc);
 
         if(provider){
@@ -31,7 +29,7 @@ export class RPCSubscriber {
     }
 
     // Internal class to create a provider
-    private static createProvider(rpc: IRPC): ethers.providers.BaseProvider | null {
+    private static createProvider(rpc: IRPCIncomplete): ethers.providers.BaseProvider | null {
         // Creates a different provider type depending on provided URL
         if(rpc.type === "ws"){
             return new ethers.providers.WebSocketProvider(rpc.url);
