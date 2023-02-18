@@ -1,4 +1,4 @@
-export interface IGroupCreateOptions {
+export type IGroupCreateOptions = {
     name: string,
     target: string,
     type: "opensea" | "mint",

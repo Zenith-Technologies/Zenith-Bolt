@@ -1,9 +1,14 @@
 // spins up the fastify instance
 import fastify, {FastifyInstance} from "fastify";
-import {TypeBoxTypeProvider} from "@fastify/type-provider-typebox";
-import fastifySwagger, {FastifyDynamicSwaggerOptions, SwaggerOptions} from "@fastify/swagger";
+import fastifySwagger, {SwaggerOptions} from "@fastify/swagger";
 import fastifySwaggerUi, {FastifySwaggerUiOptions} from "@fastify/swagger-ui";
 import Constants from "../helpers/constants";
+import {
+    jsonSchemaTransform,
+    serializerCompiler,
+    validatorCompiler,
+    ZodTypeProvider,
+} from 'fastify-type-provider-zod';
 
 export class HttpServer {
     private server: FastifyInstance;
@@ -15,7 +20,10 @@ export class HttpServer {
     async registerPlugins(){
         const app = this.server;
 
-        await app.withTypeProvider<TypeBoxTypeProvider>();
+        app.setValidatorCompiler(validatorCompiler);
+        app.setSerializerCompiler(serializerCompiler);
+
+        await app.withTypeProvider<ZodTypeProvider>();
 
         const swaggerOptions: SwaggerOptions = {
             openapi: {
@@ -25,6 +33,7 @@ export class HttpServer {
                     version: Constants.VERSION,
                 }
             },
+            transform: jsonSchemaTransform
         }
 
         const swaggerUiOptions: FastifySwaggerUiOptions = {

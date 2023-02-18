@@ -1,23 +1,25 @@
-import {Type} from "@sinclair/typebox";
+import {z} from "zod";
 import {FastifySchema} from "fastify";
 import schemaObject from "../types/RouteTypes";
 import {IGroupCreateOptions} from "../types/GroupTypes";
+import {toZod} from "tozod";
 
-const groupID = Type.Object({
-    id: Type.String()
+const groupID = z.object({
+    id: z.string()
 })
 
-const createGroupOptions = Type.Object({
-    name: Type.String(),
+const createGroupOptions = z.object({
+    name: z.string(),
     // TODO Validate if this matches the regex for an eth address if type is mint
-    target: Type.String(),
-    type: Type.Union([Type.Literal("opensea"), Type.Literal("mint")])
-});
+    target: z.string(),
+    type: z.enum(["opensea", "mint"])
+}) satisfies z.ZodType<IGroupCreateOptions>;
+
+
 
 const groupSchemas = schemaObject({
     GET_GROUPS: {
-        description: "Gets all groups",
-        querystring: Type.Object({})
+        description: "Gets all groups"
     },
     GET_GROUP_BY_ID: {
         description: "Gets a group by ID",
