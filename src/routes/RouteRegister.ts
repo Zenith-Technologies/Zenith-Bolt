@@ -4,6 +4,7 @@ import {RPCController} from "../controllers/RPCController";
 import {WalletsService} from "../services/WalletsService";
 import {WalletsController} from "../controllers/WalletsController";
 import groupSchemas from "../schemas/groups.schema";
+import rpcSchemas from "../schemas/rpcs.schema";
 
 // Registers all routes
 export class RouteRegister {
@@ -18,8 +19,8 @@ export class RouteRegister {
         /*this.registerWallets();
         this.registerTasks();
         this.registerSettings();
-        this.registerProxies();
-        this.registerRPCs();*/
+        this.registerProxies();*/
+        this.registerRPCs();
 
         return this.fastify;
     }
@@ -87,23 +88,33 @@ export class RouteRegister {
     }
 
     public registerRPCs(){
-        this.fastify.get("/rpcs", {}, (req: FastifyRequest, reply: FastifyReply) => {
+        this.fastify.get("/rpcs", {
+            schema: rpcSchemas.GET_RPCS
+        }, (req: FastifyRequest, reply: FastifyReply) => {
             return RPCController.get(req);
         });
 
-        this.fastify.get("/rpcs/:id", {}, (req, reply) => {
+        this.fastify.get("/rpcs/:id", {
+            schema: rpcSchemas.GET_RPC_BY_ID
+        }, (req, reply) => {
             return RPCController.get(req);
         });
 
-        this.fastify.post("/rpcs", {}, (req, reply) => {
+        this.fastify.post("/rpcs", {
+            schema: rpcSchemas.CREATE_RPC
+        }, (req, reply) => {
             return RPCController.create(req);
         });
 
-        this.fastify.put("/rpcs/:id", {}, (req, reply) => {
+        this.fastify.put("/rpcs/:id", {
+            schema: rpcSchemas.UPDATE_RPC
+        }, (req, reply) => {
             return RPCController.update(req);
         });
 
-        this.fastify.delete("/rpcs/:id", {}, (req, reply) => {
+        this.fastify.delete("/rpcs/:id", {
+            schema: rpcSchemas.DELETE_RPC
+        }, (req, reply) => {
             return RPCController.delete(req);
         })
     }

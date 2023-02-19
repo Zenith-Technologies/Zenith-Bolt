@@ -1,4 +1,5 @@
 import {IGroup} from "./GroupTypes";
+import {IRPC, IRPCIncomplete} from "./RPCTypes";
 
 export interface SuccessAPIResponse {
     success: true,
@@ -36,6 +37,22 @@ export interface CreateGroupResponse extends SuccessAPIResponse {
     data: IGroup
 }
 
-export interface DeleteGroupResponse extends SuccessAPIResponse {
+/*
+RPC Response Types
+ */
 
+export interface GetRPCByIdResponse extends SuccessAPIResponse {
+    data: IRPCIncomplete
+}
+
+export interface GetRPCsResponse extends SuccessAPIResponse {
+    data: IRPCIncomplete[]
+}
+
+export interface CreateRPCResponse extends SuccessAPIResponse {
+    data: IRPCIncomplete
+}
+
+export interface UpdateRPCResponse extends SuccessAPIResponse {
+    data: IRPCIncomplete
 }

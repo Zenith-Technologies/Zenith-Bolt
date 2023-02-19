@@ -3,6 +3,7 @@ import {RPCSubscriber} from "../subscribers/RPCSubscriber";
 import {nanoid} from "nanoid";
 import {ConfigModel} from "../models/ConfigModel";
 import {RPCEmitter} from "../emitters/RPCEmitter";
+import {wrap} from "../helpers/APIResponseWrapper";
 
 export class RPCService {
     private static rpcs: IRPCStorage;
@@ -49,7 +50,7 @@ export class RPCService {
         }
 
         const emitter = RPCSubscriber.create(incompleteRPC);
-        if(emitter == null) throw new Error("emitter failed");
+        if(emitter == null) throw new Error("Failed to create Emitter");
 
         // Overwrite the emitter and finalize object
         const finalizedRPC: IRPC = {

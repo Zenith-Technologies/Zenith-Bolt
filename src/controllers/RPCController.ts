@@ -2,34 +2,65 @@ import {FastifyRequest} from "fastify";
 import {IRPCOptions} from "../types/RPCTypes";
 import {RPCService} from "../services/RPCService";
 import {IDParam} from "../types/QueryParamTypes";
+import {wrap} from "../helpers/APIResponseWrapper";
 
 export class RPCController {
     static create(request: FastifyRequest) {
         const rpc = request.body as IRPCOptions;
 
-        return RPCService.create(rpc);
+        wrap((rpc) => {
+            return {
+                success: true,
+                error: null,
+                data: RPCService.create(rpc)
+            };
+        })(rpc);
     }
 
     static get(request: FastifyRequest) {
         const {id} = request.params as IDParam;
 
-        if(id){
-            return RPCService.get(id);
-        }else{
-            return RPCService.getAll();
-        }
+        wrap((id) => {
+            if(id){
+                return {
+                    success: true,
+                    error: null,
+                    data: RPCService.get(id)
+                }
+            }else{
+                return {
+                    success: true,
+                    error: null,
+                    data: RPCService.getAll()
+                };
+            }
+        })(id);
     }
 
     static update(request: FastifyRequest) {
         const {id} = request.params as IDParam;
         const rpc = request.body as IRPCOptions;
 
-        return RPCService.update(id, rpc);
+        wrap((id, rpc) => {
+            return {
+                success: true,
+                error: null,
+                data: RPCService.update(id, rpc)
+            };
+        })(id, rpc);
     }
 
     static delete(request: FastifyRequest) {
         const {id} = request.params as IDParam;
 
-        return RPCService.delete(id);
+        wrap((id) => {
+            RPCService.delete(id)
+
+            return {
+                success: true,
+                error: null,
+                data: {}
+            };
+        })(id);
     }
 }

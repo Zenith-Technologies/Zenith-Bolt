@@ -1,10 +1,8 @@
 import {z} from "zod";
-import {FastifySchema} from "fastify";
 import schemaObject from "../types/RouteTypes";
 import {IGroupCreateOptions} from "../types/GroupTypes";
-import {toZod} from "tozod";
 import {
-    CreateGroupResponse, DeleteGroupResponse,
+    CreateGroupResponse,
     ErrorAPIResponse,
     GetGroupByIdResponse,
     GetGroupsResponse,
@@ -61,10 +59,6 @@ const createGroupResponse = successResponse.extend({
     data: group
 }) satisfies z.ZodType<CreateGroupResponse>;
 
-const deleteGroupResponse = successResponse.extend({
-    data: z.object({})
-}) satisfies z.ZodType<DeleteGroupResponse>;
-
 /*
 Schema object
  */
@@ -107,7 +101,7 @@ const groupSchemas = schemaObject({
         description: "Deletes the group with the provided group ID",
         params: groupID,
         response: {
-            "2xx": deleteGroupResponse,
+            "2xx": successResponse,
             "5xx": errorResponse
         }
     }
