@@ -7,7 +7,7 @@ import {wrap} from "../helpers/APIResponseWrapper";
 
 export class GroupsController {
 
-    static create(request: FastifyRequest) {
+    static create(request: FastifyRequest): APIResponse {
         const group = request.body as IGroupCreateOptions;
 
         return wrap(() => {

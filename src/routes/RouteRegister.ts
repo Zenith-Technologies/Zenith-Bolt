@@ -5,6 +5,7 @@ import {WalletsService} from "../services/WalletsService";
 import {WalletsController} from "../controllers/WalletsController";
 import groupSchemas from "../schemas/groups.schema";
 import rpcSchemas from "../schemas/rpcs.schema";
+import walletsSchema from "../schemas/wallets.schema";
 
 // Registers all routes
 export class RouteRegister {
@@ -16,8 +17,8 @@ export class RouteRegister {
 
     public initializeRoutes(): FastifyInstance {
         this.registerGroups();
-        /*this.registerWallets();
-        this.registerTasks();
+        this.registerWallets();
+        /*this.registerTasks();
         this.registerSettings();
         this.registerProxies();*/
         this.registerRPCs();
@@ -58,31 +59,45 @@ export class RouteRegister {
     }
 
     public registerWallets(){
-        this.fastify.get("/wallets", {}, (req, reply) => {
+        this.fastify.get("/wallets", {
+            schema: walletsSchema.GET_WALLET_GROUPS
+        }, (req, reply) => {
             return WalletsController.get(req);
         })
 
-        this.fastify.get("/wallets/:id", {}, (req, reply) => {
+        this.fastify.get("/wallets/:id", {
+            schema: walletsSchema.GET_WALLET_GROUP_BY_ID
+        }, (req, reply) => {
             return WalletsController.get(req);
         })
 
-        this.fastify.post("/wallets", {}, (req, reply) => {
+        this.fastify.post("/wallets", {
+            schema: walletsSchema.CREATE_WALLET_GROUP
+        }, (req, reply) => {
             return WalletsController.create(req);
         })
 
-        this.fastify.put("/wallets/:id", {}, (req, reply) => {
+        this.fastify.put("/wallets/:id", {
+            schema: walletsSchema.UPDATE_WALLET_GROUP
+        }, (req, reply) => {
             return WalletsController.update(req);
         });
 
-        this.fastify.delete("/wallets/:id", {}, (req, reply) => {
+        this.fastify.delete("/wallets/:id", {
+            schema: walletsSchema.DELETE_WALLET_GROUP
+        }, (req, reply) => {
             return WalletsController.delete(req);
         })
 
-        this.fastify.post("/wallets/:groupId/wallet", {}, (req, reply) => {
+        this.fastify.post("/wallets/:groupId/wallet", {
+            schema: walletsSchema.ADD_WALLET_TO_WALLET_GROUP
+        }, (req, reply) => {
             return WalletsController.addWalletToGroup(req);
         })
 
-        this.fastify.delete("/wallets/:groupId/wallet/:walletId", {}, (req, reply) => {
+        this.fastify.delete("/wallets/:groupId/wallet/:walletId", {
+            schema: walletsSchema.DELETE_WALLET_FROM_WALLET_GROUP
+        }, (req, reply) => {
             return WalletsController.deleteWalletFromGroup(req);
         })
     }

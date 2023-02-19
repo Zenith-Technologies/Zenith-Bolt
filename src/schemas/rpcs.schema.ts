@@ -14,6 +14,10 @@ import {
 Schema types
  */
 
+const rpcID = z.object({
+    id: z.string()
+})
+
 const rpcOptions = z.object({
     name: z.string(),
     url: z.string(),
@@ -72,6 +76,7 @@ const rpcSchemas = schemaObject({
     GET_RPC_BY_ID: {
         description: "Get RPC by specified ID",
         operationId: "getRPCById",
+        params: rpcID,
         response: {
             "2xx": getRpcByIdResponse,
             "5xx": errorResponse
@@ -80,6 +85,7 @@ const rpcSchemas = schemaObject({
     CREATE_RPC: {
         description: "Create RPC with specified RPC options",
         operationId: "createRPC",
+        body: rpcOptions,
         response: {
             "2xx": createRPC,
             "5xx": errorResponse
@@ -88,6 +94,8 @@ const rpcSchemas = schemaObject({
     UPDATE_RPC: {
         description: "Updates RPC of provided ID with provided update options",
         operationId: "updateRPC",
+        params: rpcID,
+        body: rpcOptions,
         response: {
             "2xx": updateRPCs,
             "5xx": errorResponse
@@ -96,6 +104,7 @@ const rpcSchemas = schemaObject({
     DELETE_RPC: {
         description: "Deletes RPC with provided id",
         operationId: "deleteRPC",
+        params: rpcID,
         response: {
             "2xx": successResponse,
             "5xx": errorResponse

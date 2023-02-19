@@ -1,5 +1,6 @@
 import {IGroup} from "./GroupTypes";
 import {IRPC, IRPCIncomplete} from "./RPCTypes";
+import {IWallet, IWalletGroup} from "./WalletTypes";
 
 export interface SuccessAPIResponse {
     success: true,
@@ -55,4 +56,27 @@ export interface CreateRPCResponse extends SuccessAPIResponse {
 
 export interface UpdateRPCResponse extends SuccessAPIResponse {
     data: IRPCIncomplete
+}
+
+/*
+Wallet response types
+ */
+export interface GetWalletGroupByIdResponse extends SuccessAPIResponse {
+    data: IWalletGroup
+}
+
+export interface GetWalletsGroupResponse extends SuccessAPIResponse {
+    data: IWalletGroup[]
+}
+
+export interface UpdateWalletGroupResponse extends SuccessAPIResponse {
+    data: IWalletGroup
+}
+
+export interface CreateWalletGroupResponse extends SuccessAPIResponse {
+    data: IWalletGroup
+}
+
+export interface AddWalletToGroupResponse extends SuccessAPIResponse {
+    data: IWallet
 }

@@ -3,12 +3,13 @@ import {IRPCOptions} from "../types/RPCTypes";
 import {RPCService} from "../services/RPCService";
 import {IDParam} from "../types/QueryParamTypes";
 import {wrap} from "../helpers/APIResponseWrapper";
+import {APIResponse} from "../types/ResponseTypes";
 
 export class RPCController {
-    static create(request: FastifyRequest) {
+    static create(request: FastifyRequest): APIResponse {
         const rpc = request.body as IRPCOptions;
 
-        wrap((rpc) => {
+        return wrap((rpc) => {
             return {
                 success: true,
                 error: null,
@@ -17,10 +18,10 @@ export class RPCController {
         })(rpc);
     }
 
-    static get(request: FastifyRequest) {
+    static get(request: FastifyRequest): APIResponse {
         const {id} = request.params as IDParam;
 
-        wrap((id) => {
+        return wrap((id) => {
             if(id){
                 return {
                     success: true,
@@ -37,11 +38,11 @@ export class RPCController {
         })(id);
     }
 
-    static update(request: FastifyRequest) {
+    static update(request: FastifyRequest): APIResponse {
         const {id} = request.params as IDParam;
         const rpc = request.body as IRPCOptions;
 
-        wrap((id, rpc) => {
+        return wrap((id, rpc) => {
             return {
                 success: true,
                 error: null,
@@ -50,10 +51,10 @@ export class RPCController {
         })(id, rpc);
     }
 
-    static delete(request: FastifyRequest) {
+    static delete(request: FastifyRequest): APIResponse {
         const {id} = request.params as IDParam;
 
-        wrap((id) => {
+        return wrap((id) => {
             RPCService.delete(id)
 
             return {
