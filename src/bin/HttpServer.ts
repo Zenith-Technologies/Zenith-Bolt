@@ -54,6 +54,7 @@ export class HttpServer {
     async postRouteRegistration(){
         await this.server.ready();
         this.server.swagger();
+        //require('fs').writeFileSync("./swagger.yml", this.server.swagger({yaml: true}));
     }
 
     getServer(){

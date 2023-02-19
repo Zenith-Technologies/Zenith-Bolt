@@ -38,22 +38,15 @@ export class GroupsService {
         return Object.values(this.groups);
     }
 
-    static delete(id: string): SuccessResponse{
+    static delete(id: string): void{
         const group = this.groups[id];
         if(group) {
             // TODO Delete all tasks belonging to group
             // TasksService.deleteGroup(group);
             ConfigModel.deleteGroup(group);
             delete this.groups[id];
-
-            return {
-                success: true
-            };
         }
-        return {
-            success: false,
-            message: "Provided group ID does not exist"
-        }
+        throw new Error("Group does not exist");
     }
 }
 

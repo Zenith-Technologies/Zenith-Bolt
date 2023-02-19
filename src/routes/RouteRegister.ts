@@ -15,11 +15,11 @@ export class RouteRegister {
 
     public initializeRoutes(): FastifyInstance {
         this.registerGroups();
-        this.registerWallets();
+        /*this.registerWallets();
         this.registerTasks();
         this.registerSettings();
         this.registerProxies();
-        this.registerRPCs();
+        this.registerRPCs();*/
 
         return this.fastify;
     }

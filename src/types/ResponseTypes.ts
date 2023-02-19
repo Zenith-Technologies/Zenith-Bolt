@@ -1,10 +1,41 @@
-interface SucceededResponse {
-    success: true
+import {IGroup} from "./GroupTypes";
+
+export interface SuccessAPIResponse {
+    success: true,
+    data: {}
+    error: null
 }
 
-interface FailedResponse {
+export type ErrorAPIResponse = {
     success: false,
-    message: string
+    data: null,
+    error: {
+        message: string,
+        stack: string
+    }
 }
 
-export type SuccessResponse = SucceededResponse | FailedResponse;
+export type APIResponse = SuccessAPIResponse | ErrorAPIResponse;
+
+/*
+Group response types
+ */
+export interface GetGroupByIdResponse extends SuccessAPIResponse{
+    data: IGroup
+}
+
+export interface GetGroupsResponse extends SuccessAPIResponse{
+    data: IGroup[]
+}
+
+export interface UpdateGroupResponse extends SuccessAPIResponse {
+    data: IGroup
+}
+
+export interface CreateGroupResponse extends SuccessAPIResponse {
+    data: IGroup
+}
+
+export interface DeleteGroupResponse extends SuccessAPIResponse {
+
+}
