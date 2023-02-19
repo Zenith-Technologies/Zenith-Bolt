@@ -1,7 +1,6 @@
 import {ConfigModel} from "../models/ConfigModel";
 import {IGroup, IGroupCreateOptions, IGroupStorage} from "../types/GroupTypes";
 import {nanoid} from "nanoid";
-import {SuccessResponse} from "../types/ResponseTypes";
 
 export class GroupsService {
 

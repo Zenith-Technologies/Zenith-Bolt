@@ -7,7 +7,6 @@ import {
     IWalletOptions
 } from "../types/WalletTypes";
 import {ConfigModel} from "../models/ConfigModel";
-import {SuccessResponse} from "../types/ResponseTypes";
 import {nanoid} from "nanoid";
 import {ethers} from "ethers";
 
@@ -18,18 +17,12 @@ export class WalletsService {
         WalletsService.groups = ConfigModel.getWalletGroups();
     }
 
-    static upsertGroup(group: IWalletGroupOptions): IWalletGroup | SuccessResponse{
+    static upsertGroup(group: IWalletGroupOptions): IWalletGroup{
         if(group.wallets == null){
-            return {
-                success: false,
-                message: "Cannot create wallet group with no wallets"
-            }
+            throw new Error("Invalid wallet group options provided: no wallets provided")
         }
         if(group.wallets.length === 0){
-            return {
-                success: false,
-                message: "Cannot create wallet group with no wallets"
-            }
+            throw new Error("Invalid wallet group options provided: no wallets provided")
         }
 
         const id = nanoid();
@@ -48,44 +41,29 @@ export class WalletsService {
         return newGroup;
     }
 
-    static updateGroup(id: string, name: string): SuccessResponse{
+    static updateGroup(id: string, name: string): IWalletGroup{
         if(this.groups[id] == null){
-            return {
-                success: false,
-                message: "Cannot update nonexistent wallet group"
-            }
+            throw new Error("Invalid wallet group ID provided")
         }
 
         this.groups[id].name = name;
-        return {
-            success: true
-        }
+        return this.groups[id];
     }
 
-    static removeWalletFromGroup(groupId: string, walletId: string): SuccessResponse {
+    static removeWalletFromGroup(groupId: string, walletId: string): void {
         if(this.groups[groupId] == null){
-            return {
-                success: false,
-                message: "Cannot update nonexistent wallet group"
-            }
+            throw new Error("Invalid wallet group ID provided")
         }
 
         const toRemove = this.groups[groupId].wallets.findIndex(wallet => wallet.id === walletId);
         this.groups[groupId].wallets.splice(toRemove, 1);
 
         ConfigModel.deleteWallet(walletId);
-
-        return {
-            success: true
-        }
     }
 
-    static addWalletToGroup(id: string, wallet: IWalletOptions): IWallet | SuccessResponse{
+    static addWalletToGroup(id: string, wallet: IWalletOptions): IWallet{
         if(this.groups[id] == null){
-            return {
-                success: false,
-                message: "Cannot add to nonexistent group"
-            }
+            throw new Error("Invalid wallet group ID provided")
         }
         const groupToAddTo = this.groups[id];
 
@@ -98,12 +76,9 @@ export class WalletsService {
         return newWallet[0];
     }
 
-    static deleteGroup(id: string): SuccessResponse{
+    static deleteGroup(id: string): void{
         if(this.groups[id] == null){
-            return {
-                success: false,
-                message: "Cannot delete nonexistent group"
-            }
+            throw new Error("Invalid wallet group ID provided")
         }
         const group = this.groups[id];
 
@@ -112,18 +87,11 @@ export class WalletsService {
         }
         ConfigModel.deleteWalletGroup(group);
         delete this.groups[id];
-
-        return {
-            success: true
-        }
     }
 
-    static getGroup(id: string): IWalletGroup | SuccessResponse{
+    static getGroup(id: string): IWalletGroup{
         if(this.groups[id] == null){
-            return {
-                success: false,
-                message: "Cannot get nonexistent wallet group"
-            }
+            throw new Error("Invalid wallet group ID provided")
         }
         return this.groups[id];
     }
@@ -135,7 +103,7 @@ export class WalletsService {
     static getWallet(id: string): IStoredWallet{
         const toReturn = ConfigModel.getWallet(id);
         if(toReturn == null){
-            throw new Error("nonexistent wallet")
+            throw new Error("Invalid wallet ID provided")
         }
         return toReturn;
     }

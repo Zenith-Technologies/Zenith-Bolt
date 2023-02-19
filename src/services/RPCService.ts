@@ -2,7 +2,6 @@ import {IRPC, IRPCIncomplete, IRPCOptions, IRPCStorage} from "../types/RPCTypes"
 import {RPCSubscriber} from "../subscribers/RPCSubscriber";
 import {nanoid} from "nanoid";
 import {ConfigModel} from "../models/ConfigModel";
-import {SuccessResponse} from "../types/ResponseTypes";
 import {RPCEmitter} from "../emitters/RPCEmitter";
 
 export class RPCService {
@@ -17,7 +16,7 @@ export class RPCService {
         }
     }
 
-    static create(rpc: IRPCOptions): IRPC | SuccessResponse{
+    static create(rpc: IRPCOptions): IRPC{
         let id = nanoid();
 
         // Decides if RPC should become the default
@@ -36,10 +35,7 @@ export class RPCService {
 
         if(type == null){
             // TODO Return error
-            return {
-                success: false,
-                message: "invalid rpc url type"
-            };
+            throw new Error("Invalid RPC type")
         }
 
         // Create the object
@@ -68,13 +64,10 @@ export class RPCService {
         return finalizedRPC;
     }
 
-    static update(id: string, rpc: IRPCOptions): IRPC | SuccessResponse {
+    static update(id: string, rpc: IRPCOptions): IRPC{
         // Verify RPC exists
         if(this.rpcs[id] == null){
-            return {
-                success: false,
-                message: "nonexistent id"
-            }
+            throw new Error("Invalid RPC ID provided")
         }
 
         // Create default boolean
@@ -89,10 +82,7 @@ export class RPCService {
         let type = this.deriveType(rpc.url);
         if(type == null){
             // TODO Return error
-            return {
-                success: false,
-                message: "invalid rpc url"
-            };
+            throw new Error("Invalid RPC type")
         }
 
         // Construct RPC object
@@ -121,7 +111,7 @@ export class RPCService {
         return Object.values(this.rpcs);
     }
 
-    static delete(id: string): SuccessResponse {
+    static delete(id: string): void{
         if(this.rpcs[id]){
             const rpc = this.rpcs[id];
 
@@ -136,15 +126,9 @@ export class RPCService {
             if(changeDefault && Object.keys(this.rpcs).length > 0){
                 Object.values(this.rpcs)[0].default = true;
             }
-
-            return {
-                success: true
-            };
         }
-        return {
-            success: false,
-            message: "Provided RPC ID does not exist"
-        };
+
+        throw new Error("Invalid RPC ID provided")
     }
 
     private static deriveType(url: string): "ws" | "http" | null {

@@ -20,11 +20,14 @@ export class HttpServer {
     async registerPlugins(){
         const app = this.server;
 
+        // Sets up zod to be used for compiling/validating
         app.setValidatorCompiler(validatorCompiler);
         app.setSerializerCompiler(serializerCompiler);
 
+        // Uses zod to set up types
         await app.withTypeProvider<ZodTypeProvider>();
 
+        // Settings for setting up swagger
         const swaggerOptions: SwaggerOptions = {
             openapi: {
                 info: {
@@ -36,6 +39,7 @@ export class HttpServer {
             transform: jsonSchemaTransform
         }
 
+        // Settings for swagger UI (route serving)
         const swaggerUiOptions: FastifySwaggerUiOptions = {
             routePrefix: "/documentation",
             uiConfig: {
@@ -45,13 +49,32 @@ export class HttpServer {
             staticCSP: true,
         }
 
+        // Register plugins
         await app.register(fastifySwagger, swaggerOptions);
         await app.register(fastifySwaggerUi, swaggerUiOptions)
+
+        // Hook that changes status code if a {success: false} is found
+        app.addHook("preSerialization", (request, reply, payload, done) => {
+            if(payload == null){
+                done();
+                return;
+            }
+
+            if(typeof payload === "object") {
+                if ("success" in payload) {
+                    if(payload.success === false){
+                        reply.status(500);
+                    }
+                }
+            }
+            done();
+        })
 
         this.server = app;
     }
 
     async postRouteRegistration(){
+        // Wait for server to load all routes, then create the swagger config to serve
         await this.server.ready();
         this.server.swagger();
         //require('fs').writeFileSync("./swagger.yml", this.server.swagger({yaml: true}));
