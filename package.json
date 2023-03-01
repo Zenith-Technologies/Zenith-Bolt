@@ -11,7 +11,7 @@
     "start": "node index.js",
     "dev": "tsc-watch --onSuccess \"node ./dist\"",
     "compile-schemas": "json2ts -i src/schemas -o src/types/schemas",
-    "node": "hardhat node --config ./tests/node/hardhat.config.js",
+    "node": "hardhat node --config tests/node/hardhat.config.ts",
     "test": "jest"
   },
   "dependencies": {
