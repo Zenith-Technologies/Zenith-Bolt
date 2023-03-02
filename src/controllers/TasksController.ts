@@ -11,11 +11,27 @@ import {WalletsService} from "../services/WalletsService";
 import {ethers} from "ethers";
 import {TransactionSenderService} from "../services/TransactionSenderService";
 import {TransactionTestingService} from "../services/TransactionTestingService";
+import {task} from "hardhat/config";
+import {APIResponse} from "../types/ResponseTypes";
+import {wrap} from "../helpers/APIResponseWrapper";
+import {FastifyRequest} from "fastify";
 
 export class TasksController {
 
-    static create(taskOptions: ITaskOptions){
+    static create(request: FastifyRequest): APIResponse{
+        const taskOptions = request.body as ITaskOptions;
 
+
+
+        return wrap((options: ITaskOptions) => {
+            const task = TasksService.create(taskOptions);
+
+            return {
+                success: true,
+                error: null,
+                data: task
+            }
+        })(taskOptions);
     }
 
     static async start(taskId: string){

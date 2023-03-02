@@ -1,5 +1,6 @@
-import {ITask, ITaskStorage, TaskMetadata} from "../types/TaskTypes";
+import {ITask, ITaskOptions, ITaskStorage, TaskMetadata} from "../types/TaskTypes";
 import {ConfigModel} from "../models/ConfigModel";
+import {nanoid} from "nanoid";
 
 export class TasksService {
 
@@ -16,6 +17,16 @@ export class TasksService {
             // Set metadata
             this.setDefaultMetadata(task);
         }
+    }
+
+    static create(options: ITaskOptions): ITask {
+        const task: ITask = {
+            id: nanoid(),
+            status: "created",
+            ...options
+        }
+
+        return task;
     }
 
     static get(id: string): ITask | undefined{
